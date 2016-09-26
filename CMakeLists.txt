@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
 project (opencv_test)
 
+if(APPLE)
+	link_directories(/usr/local/opt/opencv3/share/OpenCV/3rdparty/lib/ /usr/local/opt/opencv3/lib)
+endif()
+
 list( APPEND CMAKE_CXX_FLAGS "-Wall -ggdb -std=c++14 ${CMAKE_CXX_FLAGS}")
 
 #add_subdirectory(libs)
