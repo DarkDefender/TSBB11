@@ -1,54 +1,79 @@
-#include <opencv2/photo.hpp>
-#include "opencv2/imgcodecs.hpp"
-#include <opencv2/highgui.hpp>
+//#include <opencv2/photo.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/calib3d.hpp>
+//#include "opencv2/imgcodecs.hpp"
+#include <opencv2/highgui/highgui.hpp>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 using namespace cv;
 using namespace std;
 
-void loadExposureSeq(String, vector<Mat>&, vector<float>&);
-
-int main(int, char**argv)
+int main(int argc, char* argv[])
 {
-    vector<Mat> images;
-    vector<float> times;
-    loadExposureSeq(argv[1], images, times);
+  // add frames and vids
+  VideoCapture capLeft("left_512x384.avi");
+  VideoCapture capRight("right_512x384.avi");
+  Mat frameLeft, frameRight, fL, fR, disp_map, frame_disp;
+  // add disparity
+  int ndisparities = 64;
+  int SADWindowSize = 5;
 
-    Mat response;
-    Ptr<CalibrateDebevec> calibrate = createCalibrateDebevec();
-    calibrate->process(images, response, times);
+  if(argc == 2){
+	ndisparities = atoi(argv[1]);
+	SADWindowSize = atoi(argv[2]);
+  }
 
-    Mat hdr;
-    Ptr<MergeDebevec> merge_debevec = createMergeDebevec();
-    merge_debevec->process(images, hdr, times, response);
+  Ptr<StereoSGBM> sbm = StereoSGBM::create(2, ndisparities, SADWindowSize);
+  double minVal, maxVal;
+  
+  double dWidth = capLeft.get(CV_CAP_PROP_FRAME_WIDTH);
+  double dHeight = capLeft.get(CV_CAP_PROP_FRAME_HEIGHT);
+  //  dfps = capLeft.get(CV_CAP_PROP_FRAME_RATE);
+  cout << "framesize = " << dWidth << " x " << dHeight << endl;
 
-    Mat ldr;
-    Ptr<TonemapDurand> tonemap = createTonemapDurand(2.2f);
-    tonemap->process(hdr, ldr);
+  namedWindow("LeftFrame", CV_WINDOW_AUTOSIZE);
+  namedWindow("RightFrame", CV_WINDOW_AUTOSIZE);
+  namedWindow("disparity", CV_WINDOW_AUTOSIZE);
+  namedWindow("3dpoints", CV_WINDOW_AUTOSIZE);
+  while(1)
+    {
 
-    Mat fusion;
-    Ptr<MergeMertens> merge_mertens = createMergeMertens();
-    merge_mertens->process(images, fusion);
+      capLeft >> frameLeft;
+      capRight >> frameRight;
 
-    imwrite("fusion.png", fusion * 255);
-    imwrite("ldr.png", ldr * 255);
-    imwrite("hdr.hdr", hdr);
+      if (frameLeft.empty() || frameRight.empty())
+	{
+	  cout << "cannot read frame" << endl;
+	  break;
+	}
 
-    return 0;
-}
 
-void loadExposureSeq(String path, vector<Mat>& images, vector<float>& times)
-{
-    path = path + std::string("/");
-    ifstream list_file((path + "list.txt").c_str());
-    string name;
-    float val;
-    while(list_file >> name >> val) {
-        Mat img = imread(path + name);
-        images.push_back(img);
-        times.push_back(1 / val);
+      cvtColor(frameLeft, fL, COLOR_BGR2GRAY);//.convertTo(fL, CV_8UC1);
+      cvtColor(frameRight, fR, COLOR_BGR2GRAY);//.convertTo(fR, CV_8UC1);
+      //minMaxLoc(frameLeft, &minVal, &maxVal);
+      //minMaxLoc(fL, &minVal, &maxVal);
+      
+      sbm->compute(fR, fL, disp_map);
+      minMaxLoc( disp_map, &minVal, &maxVal );
+      //cout << "framedisparity  min: " << minVal << ", max: " << maxVal << endl;
+
+      disp_map.convertTo(frame_disp, CV_8UC1, 255/(maxVal - minVal));
+
+      imshow("disparity", frame_disp);
+      
+      imshow("LeftFrame", fL);
+      imshow("RightFrame", fR);
+
+      if(waitKey(30) == 27)
+	{
+	  cout << "user escape" << endl;
+	  break;
+	}
     }
-    list_file.close();
+
+  return 0;
+
 }
