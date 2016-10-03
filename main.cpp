@@ -12,9 +12,6 @@
 #include "disp.h"
 //#include "akazefeature.h"
 
-
-
-
 using namespace cv;
 using namespace std;
 
@@ -29,6 +26,7 @@ int main(int argc, char* argv[]){
 	// stereo blockmatch settings
 	int ndisparities = 64;
 	int SADWindowSize = 5;
+    float baseFocalProd = 0.0025; //[m]  guessing....
 
 	if(argc == 3){
 		ndisparities = atoi(argv[1]);
@@ -53,7 +51,13 @@ int main(int argc, char* argv[]){
 	namedWindow("result", CV_WINDOW_AUTOSIZE);
 	// feature matching
 	vector<KeyPoint> kpts1, kpts2, matched1, matched2, inliers1, inliers2;
+    vector<double> depth;
+    vector<Mat> xCoord;
 	Mat desc1, desc2;
+    
+   // Mat invK(3,3, DataType<double>::type);
+   // invK = {1,0,0,0,1,0,0,0,1};
+    Mat invK = (Mat_<float>(3,3) << 1,0,0,0,1,0,0,0,1);
 
 	Ptr<AKAZE> akaze = AKAZE::create();
 
@@ -65,7 +69,7 @@ int main(int argc, char* argv[]){
 
 	float nn_match_ratio = 0.8f;
     int frameCounter = 0;
-    int featureMatchingOn = 0;
+    int featureMatchingOn = 1;
 	// fundamental matrix
 	Mat fMatrix; // init to fundamental matrix for rect. stereo. 
 	// main loop
@@ -133,6 +137,7 @@ int main(int argc, char* argv[]){
 			matched1.clear();
 			matched2.clear();
 		}
+    
         disparityMap = getDisparityMap( sbm , frameLeft, frameRight);
 		// show frames
 		imshow("disparity", disparityMap);
@@ -143,7 +148,17 @@ int main(int argc, char* argv[]){
 			cout << "user escape" << endl;
 			break;
 		}
+        
+        
+        for (int i = 0; i<inliers1.size();i++){
+            double deltaX = inliers1[i].pt.x - inliers2[goodMatches[i].queryIdx].pt.x;
+            depth.push_back(baseFocalProd/deltaX);
+            Mat homPoint = (Mat_<float>(3,1) << inliers1[i].pt.x,inliers1[i].pt.y,1);
+            xCoord.push_back(invK*homPoint*depth[i]);
+        }
+        
 	}
+    
 
 	return 0;
 
