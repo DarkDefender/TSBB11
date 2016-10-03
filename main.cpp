@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <opencv2/viz.hpp>
 
 // include own headers
 #include "disp.h"
