@@ -13,14 +13,56 @@
 // include own headers
 #include "disp.h"
 //#include "akazefeature.h"
-
+#include "camparse.h"
 
 
 
 using namespace cv;
 using namespace std;
 
+#define PI 3.14159265
+
 int main(int argc, char* argv[]){
+    // parse camera
+	Mat cam0 = getRotationMat("data/cam_00.cam"); 
+	Mat cam1 = getRotationMat("data/cam_01.cam");
+	cout << "cam0 = " << endl << cam0 << endl;
+ 	cout << "cam1 = " << endl << cam1 << endl;    
+	return 0;
+	
+	
+	
+	ifstream infile("data/cam_01.cam");
+	double x, y, z, yaw, pitch, roll, type, fov_s, fov_h, k2, k3, k4, cx, cy, lx, ly;
+	infile >> x >> y >> z >> yaw >> pitch >> roll >> type >> fov_s >> fov_h >> k2 >> k3 >> k4 >> cx >> cy >> lx >> ly; 
+    // get R from euler
+	double cyaw = cos(yaw*PI/180);
+	double sy = sin(yaw*PI/180);
+	double cp = cos(pitch*PI/180);
+	double sp = sin(pitch*PI/180);
+	double cr = cos(roll*PI/180);
+	double sr = sin(roll*PI/180);
+
+	Mat yaw_mat = (Mat_<double>(3,3)<< cy,sy,0,-sy,cy,0,0,0,1);
+
+	cout << "camera pos [x,y,z] = " << endl;
+	cout << x << endl << y  << endl << z  << endl << endl;
+	cout << "camera rot[yaw pitch roll] = "<< endl;
+	cout << yaw  << endl << pitch  << endl << roll << endl << endl;
+	
+	cout << " yaw mat = " << endl << yaw_mat;
+	
+	
+	
+	cout << endl << endl;
+
+	
+	cout << "starting master project..." << endl;
+	cout << argc << " input arguments given:" << endl;
+	for( int i=0; i<argc; i++){
+		cout << "	" << argv[i] << endl;
+	}
+	cout << endl << endl;
 
 	// init frame grabbers
 	VideoCapture capLeft, capRight;
@@ -58,57 +100,59 @@ int main(int argc, char* argv[]){
  	cout << ", height = " << cropFactorHeight << endl;
 
     //init frames and mats
-	Mat frameLeft, frameRight, fL, fR, disparityMap;
+	Mat frameLeft, frameRight, fL, fR;
 
-	// stereo blockmatch settings
-	int ndisparities = 64;
-	int SADWindowSize = 5;
 
-	if(argc >= 3){
-		ndisparities = atoi(argv[1]);
-		SADWindowSize = atoi(argv[2]);
-	}
-
-	if(ndisparities % 16 !=0)
-		ndisparities += 16-(ndisparities % 16);
-	// init blockmatchers
-	Ptr<StereoBM> sbmLeft = StereoBM::create(ndisparities, SADWindowSize);
-	Ptr<ximgproc::DisparityWLSFilter> sbmWLSFilter = ximgproc::createDisparityWLSFilter(sbmLeft);
-	Ptr<StereoMatcher> sbmRight = ximgproc::createRightMatcher(sbmLeft);
-    
-	sbmWLSFilter -> setLambda(1000);
-	sbmWLSFilter -> setSigmaColor(1);
-    if(argc >= 5){
-		sbmWLSFilter->setLambda( atoi(argv[3]) );
-		sbmWLSFilter->setSigmaColor( atoi(argv[4]) );
-	}
 	// open windows
 	namedWindow("LeftFrame", CV_WINDOW_AUTOSIZE);
 	namedWindow("RightFrame", CV_WINDOW_AUTOSIZE);
-	namedWindow("disparity", CV_WINDOW_AUTOSIZE);
 	namedWindow("featurematch", CV_WINDOW_AUTOSIZE);
 	
+    int featureMatchingOn = 0;
 	// feature matching
+	if(argc >= 2)
+		featureMatchingOn = atoi( argv[1] );
+	if(featureMatchingOn){
+		cout << "using feature matching" << endl;
+	} else {
+		cout << "not using feature matching" << endl;
+	}
+
+	
 	vector<KeyPoint> kpts1, kpts2, matched1, matched2, inliers1, inliers2;
 	Mat desc1, desc2;
 
-	Ptr<AKAZE> akaze = AKAZE::create();
+	// choose detector, ORB by default
+	Ptr<ORB> detector = ORB::create();
+	
+	if(argc >= 3){
+		if( atoi( argv[2] ) ){
+			//detector.release();
+			Ptr<AKAZE> detector = AKAZE::create();
+			cout << "Using AKAZE feature detector" << endl << endl;
+		} else {
+			cout << "Using ORB feature detector" << endl << endl;
+		}
+	}
 
+	// init vectors for feature matching
 	vector<DMatch> goodMatches;
 
 	vector< vector<DMatch> > NNMatches;
+	// init matcher
+	BFMatcher matcher(NORM_HAMMING);
 
-    BFMatcher matcher(NORM_HAMMING);
+	const double nn_match_ratio = 0.8f;
+	const double ransac_thresh = 2.5f;
 
-	float nn_match_ratio = 0.8f;
-    int featureMatchingOn = 0;
 	// fundamental matrix
 	Mat fMatrix; // init to fundamental matrix for rect. stereo. 
+	
 	// main loop
 	for(int frameCounter = 0; frameCounter < numFrames; frameCounter++){
 
         cout << "frame: " << frameCounter << endl;
-		// get next frame 
+		// get next view and convert to grayscale 
 		capLeft >> frameLeft;
 		capRight >> frameRight;
 		cvtColor(frameLeft, fL, COLOR_BGR2GRAY);
@@ -120,11 +164,17 @@ int main(int argc, char* argv[]){
 		
 		// feature matching
 		if (featureMatchingOn){
-
+			// clear vectors
+			inliers1.clear();
+			inliers2.clear();
+			goodMatches.clear();
+			matched1.clear();
+			matched2.clear(); 
 			// get descriptors
-			akaze->detectAndCompute(frameLeft, noArray(), kpts1, desc1);
-			akaze->detectAndCompute(frameRight, noArray(), kpts2, desc2);
-
+			detector->detectAndCompute(fL, noArray(), kpts1, desc1);
+			detector->detectAndCompute(fR, noArray(), kpts2, desc2);
+			//orb->detectAndCompute(fL, noArray(), kpts1, desc1);
+			//orb->detectAndCompute(fL, noArray(), kpts2, desc2);
 			// match points
 			matcher.knnMatch(desc1, desc2, NNMatches, 2);
 
@@ -141,55 +191,26 @@ int main(int argc, char* argv[]){
 
 			// check if points fulfil epipolar geometry (y1'*fMatrix*y2 = 0); 
 			for(unsigned i = 0; i < matched1.size(); i++) {
-				/*Mat col = Mat::ones(3, 1, CV_64F);
-				  col.at<double>(0) = matched1[i].pt.x;
-				  col.at<double>(1) = matched1[i].pt.y;
-
-				  col = homography * col;
-				  col /= col.at<double>(2);
-				  double dist = sqrt( pow(col.at<double>(0) - matched2[i].pt.x, 2) +
-				  pow(col.at<double>(1) - matched2[i].pt.y, 2));
-				  */
-				//if(dist < inlier_threshold) {
-				int new_i = static_cast<int>(inliers1.size());
-				inliers1.push_back(matched1[i]);
-				inliers2.push_back(matched2[i]);
-				goodMatches.push_back(DMatch(new_i, new_i, 0));
-				//}
+				double dist = abs( matched1[i].pt.y - matched2[i].pt.y );
+				
+				if(dist < ransac_thresh) {
+					int new_i = static_cast<int>(inliers1.size());
+					inliers1.push_back(matched1[i]);
+					inliers2.push_back(matched2[i]);
+					goodMatches.push_back(DMatch(new_i, new_i, 0));
+				}
 			}
 
 			Mat res;
 			drawMatches(frameLeft, inliers1, frameRight, inliers2, goodMatches, res);
 			imshow("featurematch", res);
-			inliers1.clear();
-			inliers2.clear();
-			goodMatches.clear();
-			matched1.clear();
-			matched2.clear();
+
+			// triangulate 3D
+
+
 		}
 
-
-        //disparityMap = getDisparityMap(sbmLeft, sbmRight, sbmWLSFilter, frameLeft, frameRight);
-		Mat dispLeft, dispRight, dispFilt;  
-		// calculate disparity map
-		sbmLeft->compute(fL, fR, dispLeft);  
-		sbmRight->compute(fR, fL, dispRight);
-		// filter
-		sbmWLSFilter->filter(dispLeft, fL, dispFilt, dispRight);
-        disparityMap = dispFilt.clone();
-		
-		
-		
-		
-		
-		
-		Mat normalizedDisp;
-		double maxVal, minVal;
-		minMaxLoc(disparityMap, &minVal, &maxVal);
-		cout << "max disp = " << maxVal << ", min disp = " << minVal << endl;
-		disparityMap.convertTo(normalizedDisp, CV_8UC1, 255/(maxVal-minVal));
 		// show frames
-		imshow("disparity", normalizedDisp);
 		imshow("RightFrame", frameRight);
 		imshow("LeftFrame", frameLeft);
 		// wait for draw and quit on esc
