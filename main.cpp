@@ -19,38 +19,16 @@
 
 using namespace cv;
 using namespace std;
-
+#ifndef PI
 #define PI 3.14159265
-
+#endif
 int main(int argc, char* argv[]){
     // parse camera
 	Mat cam0 = getRotationMat("data/cam_00.cam"); 
 	Mat cam1 = getRotationMat("data/cam_01.cam");
 	cout << "cam0 = " << endl << cam0 << endl;
  	cout << "cam1 = " << endl << cam1 << endl;    
-	return 0;
-	
-	
-	
-	ifstream infile("data/cam_01.cam");
-	double x, y, z, yaw, pitch, roll, type, fov_s, fov_h, k2, k3, k4, cx, cy, lx, ly;
-	infile >> x >> y >> z >> yaw >> pitch >> roll >> type >> fov_s >> fov_h >> k2 >> k3 >> k4 >> cx >> cy >> lx >> ly; 
-    // get R from euler
-	double cyaw = cos(yaw*PI/180);
-	double sy = sin(yaw*PI/180);
-	double cp = cos(pitch*PI/180);
-	double sp = sin(pitch*PI/180);
-	double cr = cos(roll*PI/180);
-	double sr = sin(roll*PI/180);
-
-	Mat yaw_mat = (Mat_<double>(3,3)<< cy,sy,0,-sy,cy,0,0,0,1);
-
-	cout << "camera pos [x,y,z] = " << endl;
-	cout << x << endl << y  << endl << z  << endl << endl;
-	cout << "camera rot[yaw pitch roll] = "<< endl;
-	cout << yaw  << endl << pitch  << endl << roll << endl << endl;
-	
-	cout << " yaw mat = " << endl << yaw_mat;
+   
 	
 	
 	

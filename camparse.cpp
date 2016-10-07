@@ -16,9 +16,25 @@ cv::Mat getRotationMat(char* fname){
 	cv::Mat rot = YPRtoRot(yaw, pitch, roll);
 
 	return rot;
+
+	/* Todo:
+	 * add parsing for translation to pose matrix P = [R, t];
+	 */
+
+    
+	/*
+	ifstream infile("data/cam_01.cam");
+	double x, y, z, yaw, pitch, roll, type, fov_s, fov_h, k2, k3, k4, cx, cy, lx, ly;
+	infile >> x >> y >> z >> yaw >> pitch >> roll >> type >> fov_s >> fov_h >> k2 >> k3 >> k4 >> cx >> cy >> lx >> ly; 
+	*/
 }
 
+
 cv::Mat YPRtoRot(double yaw, double pitch, double roll){
+	/*
+	 * transforms euler angles in degrees to Rotation matrix
+	 */
+
 	double cy = cos(yaw*PI/180);
 	double sy = sin(yaw*PI/180);
 	double cp = cos(pitch*PI/180);
