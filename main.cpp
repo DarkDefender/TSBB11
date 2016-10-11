@@ -11,29 +11,56 @@
 #include <cstdlib>
 
 // include own headers
-#include "disp.h"
+//#include "disp.h"
 //#include "akazefeature.h"
-#include "camparse.h"
+#include "stereoCam.h"
 
 
 
 using namespace cv;
 using namespace std;
 #ifndef PI
-#define PI 3.14159265
+#define PI 3.141592653589793
 #endif
 int main(int argc, char* argv[]){
     // parse camera
-	Mat cam0 = getRotationMat("data/cam_00.cam"); 
-	Mat cam1 = getRotationMat("data/cam_01.cam");
-	cout << "cam0 = " << endl << cam0 << endl;
- 	cout << "cam1 = " << endl << cam1 << endl;    
+	stereoCam cam0 = stereoCam("data/calib/cam_00.cam"); 
+	stereoCam cam1 = stereoCam("data/calib/cam_01.cam");
    
-	
-	
-	
-	cout << endl << endl;
+    cout << "cam0 = " << endl; 
+	Point3f pos0 = cam0.getPosition();
+	cout << "pos = " << endl;
+	cout << pos0 << endl;
+	cout << "rot = " << endl << cam0.getRotMat() << endl << endl;
+    
+    cout << "cam1 = " << endl; 
+	Point3f pos1 = cam1.getPosition();
+	cout << "pos = " << endl;
+	cout << pos1 << endl;
+	cout  << "rot = " << endl << cam1.getRotMat() << endl << endl;
+ 
+    cout << "testing cam..." << endl;
+	double xi = 1500, yi = 1250.0;
 
+	cout << "img point = " << yi << ", " << xi << endl;
+
+	Point3f xyz = cam0.g_improj_to_xyz(1, 1, xi, yi);
+	cout << "normalized = " << xyz << endl;
+	Point3f xy = cam0.g_xyz_to_improj(1, 1, xyz.x, xyz.y, xyz.z);
+	cout << "reprojected = " << xy << endl;
+
+    return 0;
+
+}
+    /* testing
+	Mat M = (Mat_<double>(3,3) << 1,1,1,2,2,2,3,3,3);
+	Mat x = (Mat_<double>(1,3) << 4,4,4);
+	M.push_back(x);
+	cout << "M = " << endl << format(M, Formatter::FMT_NUMPY) << endl << endl;
+	M.t();
+    cout << "M = " << endl << format(M, Formatter::FMT_NUMPY) << endl << endl; 
+	
+   
 	
 	cout << "starting master project..." << endl;
 	cout << argc << " input arguments given:" << endl;
@@ -200,4 +227,4 @@ int main(int argc, char* argv[]){
 
 	return 0;
 
-}
+}   */

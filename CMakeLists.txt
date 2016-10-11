@@ -8,7 +8,7 @@ endif()
 list( APPEND CMAKE_CXX_FLAGS "-Wall -ggdb -std=c++14 ${CMAKE_CXX_FLAGS}")
 
 #add_subdirectory(libs)
-add_executable(${PROJECT_NAME} main.cpp disp.cpp camparse.cpp)
+add_executable(${PROJECT_NAME} main.cpp stereoCam.cpp)
 
 include(FindPkgConfig)
 
