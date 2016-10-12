@@ -23,6 +23,10 @@ void stereoCam::read_cam_file(char* fname){
 	double x, y, z, yaw, pitch, roll;// type, fov_s, fov_h, k2, k3, k4, cx, cy, lx, ly;
 	infile >> x >> y >> z >> yaw >> pitch >> roll >> type >> fov_s >> fov_h >> k2 >> k3 >> k4 >> cx >> cy >> lx >> ly; 
 
+	double fx = 1534*0.5/tan(0.5*PI*fov_h/180);
+	double fy = 1152*0.5/tan(0.5*PI*fov_s/180);
+
+	cout << fx << ", " << fy << " focalllllll " << endl;
 	//update rel. position
 	// xyz_translation = t;
 	xyz_translation.x = x;
