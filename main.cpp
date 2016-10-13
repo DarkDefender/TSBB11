@@ -1,9 +1,12 @@
-//#include <opencv2/photo.hpp>
 #include <opencv2/opencv.hpp>
+/*
+#include <opencv2/features2d.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/ximgproc.hpp>
+#include <opencv2/photo.hpp>
 #include <opencv2/ximgproc/disparity_filter.hpp>
-//#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgcodecs.hpp"
+*/
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 #include <iostream>
@@ -13,7 +16,7 @@
 // include own headers
 //#include "disp.h"
 //#include "akazefeature.h"
-#include "stereoCam.h"
+#include "camParser.h"
 
 
 
@@ -24,32 +27,25 @@ using namespace std;
 #endif
 int main(int argc, char* argv[]){
     // parse camera
-	stereoCam cam0 = stereoCam("data/calib/cam_00.cam"); 
-	stereoCam cam1 = stereoCam("data/calib/cam_01.cam");
+	
+
+	camParser cam0 = camParser("data/calib/cam_00.cam", 1534, 1152); 
+	camParser cam1 = camParser("data/calib/cam_01.cam", 1534, 1152);
    
     cout << "cam0 = " << endl; 
-	Point3f pos0 = cam0.getPosition();
+	Point3d pos0 = cam0.getPosition();
 	cout << "pos = " << endl;
 	cout << pos0 << endl;
 	cout << "rot = " << endl << cam0.getRotMat() << endl << endl;
-    
+	cout << "pose = " << endl << cam0.getPose() << endl << endl;
+    //Matx33f Kinv((float*)kinv.clone().ptr());
+    //Matx33f k((float*)K.clone().ptr());
     cout << "cam1 = " << endl; 
 	Point3f pos1 = cam1.getPosition();
 	cout << "pos = " << endl;
 	cout << pos1 << endl;
 	cout  << "rot = " << endl << cam1.getRotMat() << endl << endl;
- 
-    cout << "testing cam..." << endl;
-	double xi = 1500, yi = 1250.0;
-
-	cout << "img point = " << yi << ", " << xi << endl;
-
-	Point3f xyz = cam0.g_improj_to_xyz(1, 1, xi, yi);
-	cout << "normalized = " << xyz << endl;
-	Point3f xy = cam0.g_xyz_to_improj(1, 1, xyz.x, xyz.y, xyz.z);
-	cout << "reprojected = " << xy << endl;
-
-    return 0;
+	cout << "pose = " << endl << cam1.getPose() << endl;
 
 }
     /* testing

@@ -1,6 +1,6 @@
 
 #include <opencv2/opencv.hpp>
-#include "stereoCam.h"
+#include "camParser.h"
 #include <vector>
 #include <fstream>
 #include <cmath>
@@ -13,20 +13,28 @@ using namespace cv;
 using namespace std;
 
 // constructor
-stereoCam::stereoCam(char* fname){
+camParser::camParser(char* fname, int width, int height){
 	// default constructor
-	stereoCam::read_cam_file(fname);
+	camParser::read_cam_file(fname, width, height);
 }
 // parse camfile
-void stereoCam::read_cam_file(char* fname){
+void camParser::read_cam_file(char* fname, int width, int height){
 	ifstream infile(fname);
 	double x, y, z, yaw, pitch, roll;// type, fov_s, fov_h, k2, k3, k4, cx, cy, lx, ly;
 	infile >> x >> y >> z >> yaw >> pitch >> roll >> type >> fov_s >> fov_h >> k2 >> k3 >> k4 >> cx >> cy >> lx >> ly; 
+	
+	// K-matrix
+	double fx = width*0.5/tan(0.5*PI*fov_h/180); // k11
+	double fy = height*0.5/tan(0.5*PI*fov_s/180); // k22
+    // img-center
+	Point2d U0 = g_xyz_to_improj(1534, 1152, Point3d(1, cy, cx));
+	double u0 = U0.x;
+	double v0 = U0.y;
 
-	double fx = 1534*0.5/tan(0.5*PI*fov_h/180);
-	double fy = 1152*0.5/tan(0.5*PI*fov_s/180);
+	K << fx,0,u0, 0,fy,v0, 0,0,1;
 
 	cout << fx << ", " << fy << " focalllllll " << endl;
+	cout << "center= " << U0;
 	//update rel. position
 	// xyz_translation = t;
 	xyz_translation.x = x;
@@ -35,30 +43,33 @@ void stereoCam::read_cam_file(char* fname){
 
 	// update matrices
 	R = rot_from_euler(yaw, pitch, roll);
-	R.copyTo(P);
-	//P.push_back(xyz_translation); // P = [R | t];
-    //cout << fov_s << ", " << fov_h << " field of views " << endl << endl;
+	P = Mat(R);
+	P = P.t();
+
+    Mat xyz = (Mat_<double>(1,3) << x, y, z);
+	P.push_back(xyz);
+	P = P.t();
 }
 
 // getters
-Point3f stereoCam::getPosition(){
+Point3d camParser::getPosition(){
 	return xyz_translation; 
 }
 
-Mat stereoCam::getPose(){
+Mat camParser::getPose(){
 	return P;
 }
 
-Mat stereoCam::getIntrinsic(){
+Matx33d camParser::getIntrinsic(){
 	return K;
 }
 
-Mat stereoCam::getRotMat(){
+Matx33d camParser::getRotMat(){
 	return R;
 }
 
 // computers
-Point3f stereoCam::euler_from_rot(Mat rot){
+Point3d camParser::euler_from_rot(Mat rot){
 	/*euler_from_rot_mat
 	  function [yaw, pitch, roll] = euler_from_rot(R)
 
@@ -67,7 +78,7 @@ Point3f stereoCam::euler_from_rot(Mat rot){
 	  roll = atan2(R(2,3), R(3,3));
 	  */
     double yaw, pitch, roll;
-	Point3f euler_angles;
+	Point3d euler_angles;
 	yaw = 180/PI*atan2( rot.at<double>(0,1), rot.at<double>(0,0) );
 	pitch = 180/PI*asin( -rot.at<double>(0,2) );
 	roll = atan2( rot.at<double>(1,2), rot.at<double>(2,2) )*180/PI; 
@@ -79,7 +90,7 @@ Point3f stereoCam::euler_from_rot(Mat rot){
 	return euler_angles;
 }
 
-Mat stereoCam::rot_from_euler(double yaw, double pitch, double roll){
+Mat camParser::rot_from_euler(double yaw, double pitch, double roll){
 	/*
 	 * transforms euler angles in degrees to Rotation matrix
 	 */
@@ -102,7 +113,7 @@ Mat stereoCam::rot_from_euler(double yaw, double pitch, double roll){
 } 
 
 
-double stereoCam::f0_lens(double radius1){
+double camParser::f0_lens(double radius1){
 	/* 
 	// undistort
 	function res = F0_LENS(proj, r1)
@@ -116,7 +127,7 @@ double stereoCam::f0_lens(double radius1){
 	return (1.0 + (k2 + (k3 + k4*radius1)*radius1)*radius1*radius1);
 }
 
-double stereoCam::f1_lens(double radius1){
+double camParser::f1_lens(double radius1){
 	/* 
 	   function res = F1_LENS(proj, r1)
 	   
@@ -130,13 +141,15 @@ double stereoCam::f1_lens(double radius1){
 }
 
 
-Point3f stereoCam::g_improj_to_xyz(double xs, double ys, double xi, double yi){
+Point3d camParser::g_improj_to_xyz(double width, double height, Point2d imgPoint){
 	/*
 	 * return xyz normalized image coordinates
 	 * !!! DISCLAIMER: SAAB defines x - forward, y - right, z - down, from image
 	 * normally x - right, y - down, and z - forward!!!!
 	 */
-	Point3f XG;
+	double xs = width, ys = height;
+	double xi = imgPoint.x, yi = imgPoint.y;
+	Point3d X;
 	double xg,yg,zg,r1,r2,c1;
 	double GPIX0 = 0.5;
 	xi+=GPIX0;
@@ -161,12 +174,12 @@ Point3f stereoCam::g_improj_to_xyz(double xs, double ys, double xi, double yi){
 		zg = zg-ly;
 
         // saab default:
-		XG.x = xg;
-		XG.y = yg;
-		XG.z = zg;
+		X.x = xg;
+		X.y = yg;
+		X.z = zg;
         // normal xyz:
 		// XG.x = yg; XG.y = zg; XG.z = xg;
-		return XG;
+		return X;
 	//}
 	
 	
@@ -213,13 +226,14 @@ Point3f stereoCam::g_improj_to_xyz(double xs, double ys, double xi, double yi){
 	// triangulate?
 }
 
-Point3f stereoCam::g_xyz_to_improj(double xs, double ys, double x, double y, double z){
+Point2d camParser::g_xyz_to_improj(double width, double height, Point3d X){
 	/*
 	 * !!! USES SAAB-ORIENTATION
 	 */
-
+	double xs = width, ys = height;
+	double x = X.x, y = X.y, z = X.z;
 	double xi,yi,wi,GPIX0 = 0.5,w,r1,c2;
-	Point3f XY;
+	Point2d imgCoord;
 
 	w = 1.0/x;
 	y = y*w;
@@ -240,11 +254,10 @@ Point3f stereoCam::g_xyz_to_improj(double xs, double ys, double x, double y, dou
 
 	xi = xi - GPIX0;
 	yi = yi - GPIX0;
-	XY.x = xi;
-	XY.y = yi;
-	XY.z = wi;
+	imgCoord.x = xi/wi;
+	imgCoord.y = yi/wi;
 
-	return XY;
+	return imgCoord;
 
 	/* // project 3D to img plane
 	   function [xi, yi, wi] = g_xyz_to_improj(proj, xs, ys, x, y, z)
