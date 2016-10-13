@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
-#include <opencv2/viz.hpp>
 
 #include <boost/thread/thread.hpp>
 #include <pcl/common/common_headers.h>
@@ -32,11 +31,11 @@ int user_data;
 
 int main(int argc, char* argv[]){
     // parse camera
-    Mat cam0 = getRotationMat("data/cam_00.cam");
+  /*  Mat cam0 = getRotationMat("data/cam_00.cam");
     Mat cam1 = getRotationMat("data/cam_01.cam");
     cout << "cam0 = " << endl << cam0 << endl;
     cout << "cam1 = " << endl << cam1 << endl;
-    
+   */ 
     
     cout << endl << endl;
     
@@ -232,7 +231,7 @@ int main(int argc, char* argv[]){
             point_cloud.height = 1;
             point_cloud.is_dense = false;
             
-            pcl::io::savePCDFileASCII ("test_pcd.pcd", point_cloud);
+            pcl::io::savePCDFileASCII ("../pcl/build/my_point_cloud.pcd", point_cloud);
             
         }
         

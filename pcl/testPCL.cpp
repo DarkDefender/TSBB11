@@ -321,7 +321,7 @@ main (int argc, char** argv)
   point_cloud_ptr->width = (int) point_cloud_ptr->points.size ();
   point_cloud_ptr->height = 1;
   
-  pcl::io::loadPCDFile ("my_point_cloud.pcd", *basic_cloud_ptr);
+  pcl::io::loadPCDFile ("../../pcdfile/bun0.pcd", *basic_cloud_ptr);
   
   // ----------------------------------------------------------------
   // -----Calculate surface normals with a search radius of 0.05-----
