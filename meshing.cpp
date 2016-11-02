@@ -1,5 +1,5 @@
 //
-//  
+//
 //
 //  Created by Johan Lind on 2016-10-03.
 //
@@ -14,7 +14,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <boost/thread/thread.hpp>
-
+#include <string>
 
 
 #include <pcl/point_types.h>
@@ -35,16 +35,68 @@
 #include <pcl/common/common_headers.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/console/parse.h>
+#include <pcl/visualization/keyboard_event.h>
 
-//using namespace cv;
-//using namespace std;
-
-/*void meshing(pcl::PointCloud<pcl::PointXYZ> point_cloud){
-    
-}
-*/
 
 using namespace pcl;
+using namespace std;
+
+//Parameters
+double searchRadius = 1.5;
+double mu = 3;
+unsigned maxNN = 400;
+double maxSurfAng = M_PI/2;
+double minAng = M_PI/36;
+double maxAng = M_PI/2;
+bool normalConsistency = true;
+
+bool keyFlag = true;
+
+//KeyboardEvent
+void keyboardEventOccurred (const pcl::visualization::KeyboardEvent &event, void* viewer_void)
+{
+    pcl::visualization::PCLVisualizer *viewer = static_cast<pcl::visualization::PCLVisualizer *> (viewer_void);
+    if (event.keyDown () && keyFlag){
+        keyFlag = false;
+        cout << event.getKeySym() << endl;
+        const char * key = event.getKeySym().c_str();
+        switch ((int)key[0]){
+            case (int)'w' :
+                cout << "w was pressed => searchRadius increased" << endl;
+                searchRadius = searchRadius + 0.1;
+                cout << searchRadius << endl;
+                break;
+            case (int)'s' :
+                cout << "s was pressed => searchRadius decreased" << endl;
+                searchRadius = searchRadius - 0.1;
+                cout << searchRadius << endl;
+                break;
+            case (int)'y' :
+                cout << "y was pressed => mu increased" << endl;
+                mu = mu + 0.1;
+                cout << mu << endl;
+                break;
+            case (int)'h' :
+                cout << "h was pressed => mu decreased" << endl;
+                mu = mu - 0.1;
+                cout << mu << endl;
+                break;
+            case (int)'t' :
+                cout << "t was pressed => maxNN increased" << endl;
+                maxNN = maxNN + 20;
+                cout << maxNN << endl;
+                break;
+            case (int)'g' :
+                cout << "g was pressed => maxNN decreased" << endl;
+                maxNN = maxNN - 20;
+                cout << maxNN << endl;
+                break;
+        }
+    }
+    if(event.keyUp()){
+        keyFlag = true;
+    }
+}
 
 int
 main (int argc, char** argv)
@@ -55,50 +107,11 @@ main (int argc, char** argv)
     pcl::io::loadPLYFile ("../pcdfile/punkthog.ply", cloud_blob);
     pcl::fromPCLPointCloud2 (cloud_blob, *cloud);
     //* the data should be available in cloud
-    
- /*   MovingLeastSquares<PointXYZ, PointXYZ> mls;
-    mls.setInputCloud (cloud);
-    mls.setSearchRadius (0.1);
-    mls.setPolynomialFit (true);
-    mls.setPolynomialOrder (2);
-    mls.setUpsamplingMethod (MovingLeastSquares<PointXYZ, PointXYZ>::SAMPLE_LOCAL_PLANE);
-    mls.setUpsamplingRadius (0.005);
-    mls.setUpsamplingStepSize (0.003);
-    PointCloud<PointXYZ>::Ptr cloud_smoothed (new PointCloud<PointXYZ> ());
-    mls.process (*cloud_smoothed);
-    NormalEstimationOMP<PointXYZ, Normal> ne;
-    ne.setNumberOfThreads (8);
-    ne.setInputCloud (cloud_smoothed);
-    ne.setRadiusSearch (0.1);
-    Eigen::Vector4f centroid;
-    compute3DCentroid (*cloud_smoothed, centroid);
-    ne.setViewPoint (centroid[0], centroid[1], centroid[2]);
-    PointCloud<Normal>::Ptr cloud_normals (new PointCloud<Normal> ());
-    ne.compute (*cloud_normals);
-    for (size_t i = 0; i < cloud_normals->size (); ++i)
-    {
-        cloud_normals->points[i].normal_x *= -1;
-        cloud_normals->points[i].normal_y *= -1;
-        cloud_normals->points[i].normal_z *= -1;
-    }
-    PointCloud<PointNormal>::Ptr cloud_smoothed_normals (new PointCloud<PointNormal> ());
-    concatenateFields (*cloud_smoothed, *cloud_normals, *cloud_smoothed_normals);
-    
-    Poisson<PointNormal> poisson;
-    poisson.setDepth (9);
-    poisson.setInputCloud (cloud_smoothed_normals);
-    PolygonMesh mesh;
-    poisson.reconstruct (mesh);
-    
-    io::savePCDFile ("../pcdfile/cloudSmooth.pcd", *cloud_smoothed);
-    io::saveOBJFile ("../objects/meshPOI.obj", mesh);
-
-    
-    //---------
-    // GREEDY
-    //---------
-    
-      */
+     
+     //---------
+     // GREEDY
+     //---------
+     
     // Normal estimation*
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
     pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
@@ -123,14 +136,6 @@ main (int argc, char** argv)
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
     pcl::PolygonMesh triangles;
     
-    //Parameters
-    double searchRadius = 1.5;
-    double mu = 3;
-    unsigned maxNN = 400;
-    double maxSurfAng = M_PI/2;
-    double minAng = M_PI/36;
-    double maxAng = M_PI/2;
-    bool normalConsistency = true;
     
     // Set the maximum distance between connected points (maximum edge length)
     gp3.setSearchRadius (searchRadius);
@@ -151,7 +156,7 @@ main (int argc, char** argv)
     // Additional vertex information
     std::vector<int> parts = gp3.getPartIDs();
     std::vector<int> states = gp3.getPointStates();
-
+    
     
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
@@ -162,9 +167,29 @@ main (int argc, char** argv)
     while (!viewer->wasStopped ()){
         viewer->spinOnce (100);
         boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+        viewer->registerKeyboardCallback (keyboardEventOccurred, (void*)viewer.get ());
+        if(!keyFlag){
+            viewer->removePolygonMesh("meshes");
+            gp3.setSearchRadius (searchRadius);
+            gp3.setMu (mu);
+            gp3.setMaximumNearestNeighbors (maxNN);
+            gp3.setMaximumSurfaceAngle(maxSurfAng); // 45 degrees
+            gp3.setMinimumAngle(minAng); // 10 degrees
+            gp3.setMaximumAngle(maxAng); // 120 degrees
+            gp3.setNormalConsistency(normalConsistency);
+            
+            // Get result
+            gp3.setInputCloud (cloud_with_normals);
+            gp3.setSearchMethod (tree2);
+            gp3.reconstruct (triangles);
+            
+            // Additional vertex information
+            std::vector<int> parts = gp3.getPartIDs();
+            std::vector<int> states = gp3.getPointStates();
+            viewer->addPolygonMesh(triangles,"meshes",0);
         }
+    }
     pcl::io::saveOBJFile ("../objects/mesh.obj", triangles);
-
     
     // Finish
     return (0);
