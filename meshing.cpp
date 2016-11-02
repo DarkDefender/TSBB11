@@ -98,44 +98,6 @@ main (int argc, char** argv)
     // GREEDY
     //---------
     
-    // Concatenate the XYZ and normal fields*
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
-    pcl::concatenateFields (*cloud_smoothed, *cloud_normals, *cloud_with_normals);
-    //* cloud_with_normals = cloud + normals
-    
-    // Create search tree*
-    pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
-    tree2->setInputCloud (cloud_with_normals);
-    
-    // Initialize objects
-    pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
-    pcl::PolygonMesh triangles;
-    
-    // Set the maximum distance between connected points (maximum edge length)
-    gp3.setSearchRadius (0.9);
-    
-    // Set typical values for the parameters
-    gp3.setMu (2.0);
-    gp3.setMaximumNearestNeighbors (300);
-    gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
-    gp3.setMinimumAngle(M_PI/18); // 10 degrees
-    gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
-    gp3.setNormalConsistency(false);
-    
-    // Get result
-    gp3.setInputCloud (cloud_with_normals);
-    gp3.setSearchMethod (tree2);
-    gp3.reconstruct (triangles);
-    
-    // Additional vertex information
-    std::vector<int> parts = gp3.getPartIDs();
-    std::vector<int> states = gp3.getPointStates();
-    
-    pcl::io::saveOBJFile ("../objects/mesh.obj", triangles);
-    
-    // Finish
-    return (0);
-    
       */
     // Normal estimation*
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
@@ -161,16 +123,25 @@ main (int argc, char** argv)
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
     pcl::PolygonMesh triangles;
     
+    //Parameters
+    double searchRadius = 1.5;
+    double mu = 3;
+    unsigned maxNN = 400;
+    double maxSurfAng = M_PI/2;
+    double minAng = M_PI/36;
+    double maxAng = M_PI/2;
+    bool normalConsistency = true;
+    
     // Set the maximum distance between connected points (maximum edge length)
-    gp3.setSearchRadius (2);
+    gp3.setSearchRadius (searchRadius);
     
     // Set typical values for the parameters
-    gp3.setMu (3);
-    gp3.setMaximumNearestNeighbors (350);
-    gp3.setMaximumSurfaceAngle(M_PI/2); // 45 degrees
-    gp3.setMinimumAngle(M_PI/36); // 10 degrees
-    gp3.setMaximumAngle(M_PI/2); // 120 degrees
-    gp3.setNormalConsistency(true);
+    gp3.setMu (mu);
+    gp3.setMaximumNearestNeighbors (maxNN);
+    gp3.setMaximumSurfaceAngle(maxSurfAng); // 45 degrees
+    gp3.setMinimumAngle(minAng); // 10 degrees
+    gp3.setMaximumAngle(maxAng); // 120 degrees
+    gp3.setNormalConsistency(normalConsistency);
     
     // Get result
     gp3.setInputCloud (cloud_with_normals);
@@ -180,8 +151,20 @@ main (int argc, char** argv)
     // Additional vertex information
     std::vector<int> parts = gp3.getPartIDs();
     std::vector<int> states = gp3.getPointStates();
+
     
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+    viewer->setBackgroundColor (0, 0, 0);
+    viewer->addPolygonMesh(triangles,"meshes",0);
+    viewer->addCoordinateSystem (1.0);
+    viewer->initCameraParameters ();
+    
+    while (!viewer->wasStopped ()){
+        viewer->spinOnce (100);
+        boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+        }
     pcl::io::saveOBJFile ("../objects/mesh.obj", triangles);
+
     
     // Finish
     return (0);
