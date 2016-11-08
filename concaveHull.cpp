@@ -11,6 +11,7 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/pcl_base.h>
 #include <pcl/io/obj_io.h>
+#include "popt.h"
 
 #include <pcl/common/common_headers.h>
 #include <pcl/visualization/pcl_visualizer.h>
@@ -18,22 +19,39 @@
 #include <pcl/visualization/keyboard_event.h>
 /* Parameters to adjust are 
  */
-int
-main (int argc, char** argv)
-{
+float filterLimit = 4.0;
+float distanceThreshold = 100;
+float alphaValue = 0.15;
+static char *filename;
+
+static struct poptOption optionsTable[] = {
+    {"filterLimit", 'f', POPT_ARG_FLOAT, &filterLimit, 0, "the limits of the filter",NULL},
+    {"pointCloud", 'p', POPT_ARG_STRING, &filename, 0, "name of point cloud",NULL},
+    {"distanceThreshold", 'd', POPT_ARG_FLOAT, &distanceThreshold, 0, "distance threshold",NULL},
+    {"alphaValue", 'a', POPT_ARG_FLOAT, &alphaValue, 0, "alpha value",NULL},
     
-    float filterLimit = 300.0;
-    float distanceThreshold = 0.01;
-    float alphaValue = 0.1;
+    POPT_AUTOALIAS
+    POPT_AUTOHELP
+    POPT_TABLEEND
+};
+
+int main (int argc, char** argv)
+{
+    poptContext context = poptGetContext(
+    (char*) "popt1", argc,(const char **) argv,
+                                         (const struct poptOption* ) &optionsTable,
+                                         0);
+    int option = poptGetNextOpt(context);
+                                         
+    
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>),
     cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>),
     cloud_projected (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PCDReader reader;
     
-    if(argc ==2){
-        reader.read (argv[1], *cloud);
-    }
-    else return 0;
+    
+    reader.read(filename, *cloud);
+   
     
     
     
