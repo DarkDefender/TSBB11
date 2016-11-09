@@ -20,6 +20,9 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/common/centroid.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/common/transforms.h>
+#include <Eigen/Dense>
+
 
 
 int
@@ -31,9 +34,9 @@ main (int argc, char** argv)
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_poses (new pcl::PointCloud<pcl::PointXYZ>);
     
-   // load the point cloud and poses point cloud
+    // load the point cloud and poses point cloud
     pcl::PCLPointCloud2 cloud_blob;
-    pcl::io::loadPLYFile ("../pcdfile/dense.ply", cloud_blob);
+    pcl::io::loadPCDFile ("../pcdfile/pc000100.pcd", cloud_blob);
     pcl::fromPCLPointCloud2 (cloud_blob, *cloud);
     
     pcl::PCLPointCloud2 poses;
@@ -45,7 +48,7 @@ main (int argc, char** argv)
     //------------------------------
     std::vector<pcl::Vertices> vertices;
     pcl::Vertices vt;
-    for (int i = 0; i<cloud_poses->size();i++){
+    for (int i = 0; i<cloud_poses->size(); i++){
         vt.vertices.push_back(i);
     }
     vertices.push_back(vt);
@@ -110,15 +113,45 @@ main (int argc, char** argv)
     
     std::cout<<"size before filt: "<< cloud->size()<<std::endl;
     std::cout<<"size after filt: "<< cloud_filtered->size()<<std::endl;
+
+    // ----------------
+    // Rotate ORB SLAM PC to this coord sys
+    // ----------------
+
+    // Viewpoints exported from ORB-SLAM2
+    // 100: 0.000000 -0.194615707 0.062869363 0.166686013 x= -0.093350478 y= -0.075912602 z= 0.017663542 w= 0.992577910
+    // 200: 0.000000 -1.636660933 0.150365740 0.651330590 -0.050624952 0.245877609 0.018973112 0.967791975
     
+    pcl::PointCloud<pcl::PointXYZ>::Ptr orb(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr orbZ(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr orbTrans(new pcl::PointCloud<pcl::PointXYZ>);
+
+    pcl::PCLPointCloud2 orbLoad;
+    pcl::io::loadPCDFile ("../pcdfile/mapPoints.pcd", orbLoad);
+    pcl::fromPCLPointCloud2 (orbLoad, *orb);
+
+    Eigen::Quaternionf Q(0.992577910, -0.093350478, -0.075912602, 0.017663542);
+    Eigen::Matrix<float, 3, 1> translation;
+    translation << -0.194615707, 0.062869363, 0.166686013;
+    Eigen::Affine3f rotZ = Eigen::Affine3f::Identity();
+    rotZ.rotate(Eigen::AngleAxisf (M_PI, Eigen::Vector3f::UnitZ()));
+
+    // Rotates pi around z...
+    pcl::transformPointCloud(*orb, *orbZ, rotZ);
+    // Transforms
+    pcl::transformPointCloud(*orbZ, *orbTrans, translation, Q);
+ 
     // ---------------
     // Visualize
     // ---------------
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
     pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(cloud_poses, 255, 0, 0);
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> greenColor(cloud_poses, 0, 255, 0);
+
     viewer->addPointCloud(cloud_poses,single_color, "cameraPath");
     viewer->addPointCloud(cloud_filtered,"filtCloud");
+    viewer->addPointCloud(orbTrans, greenColor, "orbTrans");
     viewer->addCoordinateSystem (1.0);
     viewer->initCameraParameters ();
     
