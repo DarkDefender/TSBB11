@@ -15,28 +15,28 @@ echo $3
 
 #Preprocess input image data
 
-#mkdir -p data/left
-#mkdir -p data/right
-#
-#ffmpeg -i $1 data/left/%04d.png
-#
-#ffmpeg -i $2 data/right/%04d.png
-#
-#for filename in data/left/*.png; do
-#	base=$(basename $filename) 
-#	echo ${base%.*} >> data/timestamps.txt
-#done
-#
+mkdir -p data/left
+mkdir -p data/right
+
+ffmpeg -i $1 data/left/%04d.png
+
+ffmpeg -i $2 data/right/%04d.png
+
+for filename in data/left/*.png; do
+	base=$(basename $filename) 
+	echo ${base%.*} >> data/timestamps.txt
+done
+
 #Run orb slam 2 to extract camera path
 
-#cd ORB_SLAM2
+cd ORB_SLAM2
 
-#./Examples/Stereo/stereo_saab Vocabulary/ORBvoc.txt Examples/Stereo/SAAB.yaml ../data/left ../data/right ../data/timestamps.txt
+./Examples/Stereo/stereo_saab Vocabulary/ORBvoc.txt $3 ../data/left ../data/right ../data/timestamps.txt
 
-#mv CameraTrajectory.txt ../data
-#mv KeyFrameTrajectory.txt ../data
+mv CameraTrajectory.txt ../data
+mv KeyFrameTrajectory.txt ../data
 
-#cd ..
+cd ..
 
 #Rectify keyframe images
 
@@ -48,7 +48,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	printf -v number "%04d" ${number%.*}
 #	echo $number
 	fname=$number.png
-	stereo-calibration/build/undistort_rectify -l data/left/"$fname" -r data/right/"$fname" -c cam_stereo.yml -L data/lrect/"$fname" -R data/rrect/"$fname"
+	stereo-calibration/build/undistort_rectify -l data/left/"$fname" -r data/right/"$fname" -c $3 -L data/lrect/"$fname" -R data/rrect/"$fname"
 done < "data/KeyFrameTrajectory.txt"
 
 #Create disp files
