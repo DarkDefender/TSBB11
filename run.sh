@@ -86,6 +86,8 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	build/cutting2 $pcdname finalCloud.pcd camerapos.pcd $trans
 done < "data/KeyFrameTrajectory.txt" 
 
+#build/cleanUp finalCloud.pcd 0.01 15 0.01
+
 #Mesh final PCD
 
 
