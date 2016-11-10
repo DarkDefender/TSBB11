@@ -4,3 +4,7 @@
 [submodule "spsstereo"]
 	path = spsstereo
 	url = https://github.com/DarkDefender/spsstereo.git
+[submodule "ORB_SLAM2"]
+	path = ORB_SLAM2
+	url = https://github.com/DarkDefender/ORB_SLAM2.git
+	branch = tsbb11
