@@ -1,0 +1,6 @@
+[submodule "3drecon"]
+	path = 3drecon
+	url = https://github.com/DarkDefender/3drecon.git
+[submodule "spsstereo"]
+	path = spsstereo
+	url = https://github.com/DarkDefender/spsstereo.git
