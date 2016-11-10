@@ -73,3 +73,9 @@ for filename in data/disp/*.png; do
 	base=$(basename $filename) 
 	./3drecon/disp2cloud data/left/$base $filename $3
 done
+
+#Merge all PCDs
+
+#Mesh final PCD
+
+#Open blender to calc volume
