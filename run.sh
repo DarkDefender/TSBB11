@@ -75,7 +75,7 @@ done
 
 cp pcdfile/emptyCloud.pcd finalCloud.pcd
 
-build/cam2pcd dat/keyFrameTrajectory.txt
+frametxttopcd/build/frametxt2pcd data/keyFrameTrajectory.txt camerapos.pcd
 
 while IFS='' read -r line || [[ -n "$line" ]]; do
     number=$(echo "$line" | awk '{print $1;}')
@@ -83,7 +83,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	printf -v number "%04d" ${number%.*}
 #	echo $number
 	pcdname=$number.pcd
-	build/cutting2 $pcdname finalCloud.pcd camerapos.psd $trans
+	build/cutting2 $pcdname finalCloud.pcd camerapos.pcd $trans
 done < "data/KeyFrameTrajectory.txt" 
 
 #Mesh final PCD
