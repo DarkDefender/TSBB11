@@ -154,6 +154,7 @@ main (int argc, char** argv)
     // ---------------
     // Visualize
     // ---------------
+	/*
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
     
@@ -167,7 +168,7 @@ main (int argc, char** argv)
         viewer->spinOnce (100);
         boost::this_thread::sleep (boost::posix_time::microseconds (100000));
     }
-
-    pcl::io::savePCDFile ("../pcdfile/finalCloud.pcd", *oldCloud);
+    */
+    pcl::io::savePCDFile ("finalCloud.pcd", *oldCloud, true);
     return (0);
 }
