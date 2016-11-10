@@ -13,6 +13,8 @@ echo $3
 
 exit 0
 
+#Preprocess input image data
+
 mkdir -p data/left
 mkdir -p data/right
 
@@ -25,6 +27,8 @@ for filename in data/left/*.png; do
 	echo ${base%.*} >> data/timestamps.txt
 done
 
+#Run orb slam 2 to extract camera path
+
 cd ORB_SLAM2
 
 ./Examples/Stereo/saab_stereo Vocabulary/ORBvoc.txt Examples/Stereo/SAAB.yaml ../data/left ../data/right ../data/timestamps.txt
@@ -34,6 +38,7 @@ mv KeyFrameTrajectory.txt ../data
 
 cd ..
 
+#Rectify keyframe images
 cd rectify_map
 
 mkdir -p data/lrect
@@ -49,6 +54,7 @@ done < "../data/KeyFrameTrajectory.txt"
 
 cd ..
 
+#Create disp files
 mkdir -p data/disp
 cd data/disp
 
@@ -59,6 +65,8 @@ for filename in ../lrect/*.png; do
 done
 
 cd ../../
+
+#Create PCD files
 mkdir -p data/pcd/
 
 for filename in data/disp/*.png; do 
