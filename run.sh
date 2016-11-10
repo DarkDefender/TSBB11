@@ -73,6 +73,20 @@ done
 
 #Merge all PCDs
 
+cp pcdfile/emptyCloud.pcd finalCloud.pcd
+
+build/cam2pcd dat/keyFrameTrajectory.txt
+
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    number=$(echo "$line" | awk '{print $1;}')
+	trans=$(echo "$line"  | awk '{$1=""; print $0}')
+	printf -v number "%04d" ${number%.*}
+#	echo $number
+	pcdname=$number.pcd
+	build/cutting2 $pcdname finalCloud.pcd camerapos.psd $trans
+done < "data/KeyFrameTrajectory.txt" 
+
 #Mesh final PCD
+
 
 #Open blender to calc volume
