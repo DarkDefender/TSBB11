@@ -32,12 +32,17 @@ main (int argc, char** argv)
     //Create point cloud ptrs
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2 (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_poses (new pcl::PointCloud<pcl::PointXYZ>);
     
-    // load the point cloud and poses point cloud
+    // load the point clouds and poses point cloud
     pcl::PCLPointCloud2 cloud_blob;
     pcl::io::loadPCDFile ("../pcdfile/pc000100.pcd", cloud_blob);
     pcl::fromPCLPointCloud2 (cloud_blob, *cloud);
+
+    pcl::PCLPointCloud2 cloud_blob2;
+    pcl::io::loadPCDFile ("../pcdfile/pc000200.pcd", cloud_blob2);
+    pcl::fromPCLPointCloud2 (cloud_blob2, *cloud_filtered2);
     
     pcl::PCLPointCloud2 poses;
     pcl::io::loadPCDFile ("../pcdfile/CameraPositions.pcd", poses);
@@ -122,24 +127,36 @@ main (int argc, char** argv)
     // 100: 0.000000 -0.194615707 0.062869363 0.166686013 x= -0.093350478 y= -0.075912602 z= 0.017663542 w= 0.992577910
     // 200: 0.000000 -1.636660933 0.150365740 0.651330590 -0.050624952 0.245877609 0.018973112 0.967791975
     
+    // PC for ORB and transformation
     pcl::PointCloud<pcl::PointXYZ>::Ptr orb(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr orbZ(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr orbTrans(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudZ(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudZTrans(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudZ2(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloudZTrans2(new pcl::PointCloud<pcl::PointXYZ>);
 
     pcl::PCLPointCloud2 orbLoad;
-    pcl::io::loadPCDFile ("../pcdfile/mapPoints.pcd", orbLoad);
+    pcl::io::loadPCDFile ("../pcdfile/MapPoints.pcd", orbLoad);
     pcl::fromPCLPointCloud2 (orbLoad, *orb);
 
+    // Q1
     Eigen::Quaternionf Q(0.992577910, -0.093350478, -0.075912602, 0.017663542);
     Eigen::Matrix<float, 3, 1> translation;
     translation << -0.194615707, 0.062869363, 0.166686013;
+
+    // Q2
+    Eigen::Quaternionf Q2(0.967791975, -0.050624952, 0.245877609, 0.018973112);
+    Eigen::Matrix<float, 3, 1> translation2;
+    translation2 << -1.636660933, 0.150365740, 0.651330590;
+
+    // Rotates pi around z-axis
     Eigen::Affine3f rotZ = Eigen::Affine3f::Identity();
     rotZ.rotate(Eigen::AngleAxisf (M_PI, Eigen::Vector3f::UnitZ()));
+    pcl::transformPointCloud(*cloud_filtered, *cloudZ, rotZ);
+    pcl::transformPointCloud(*cloud_filtered2, *cloudZ2, rotZ);
 
-    // Rotates pi around z...
-    pcl::transformPointCloud(*orb, *orbZ, rotZ);
     // Transforms
-    pcl::transformPointCloud(*orbZ, *orbTrans, translation, Q);
+    pcl::transformPointCloud(*cloudZ, *cloudZTrans, translation, Q);
+    pcl::transformPointCloud(*cloudZ2, *cloudZTrans2, translation2, Q2);
  
     // ---------------
     // Visualize
@@ -147,11 +164,15 @@ main (int argc, char** argv)
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
     pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(cloud_poses, 255, 0, 0);
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> greenColor(cloud_poses, 0, 255, 0);
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> greenColor(orb, 0, 255, 0);
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> cyanColor(cloudZTrans2, 0, 255, 255);
+
 
     viewer->addPointCloud(cloud_poses,single_color, "cameraPath");
-    viewer->addPointCloud(cloud_filtered,"filtCloud");
-    viewer->addPointCloud(orbTrans, greenColor, "orbTrans");
+    viewer->addPointCloud(cloudZTrans, "filtCloud");
+    viewer->addPointCloud(orb, greenColor, "orbTrans");
+    viewer->addPointCloud(cloudZTrans2, cyanColor, "filtCloud2");
+
     viewer->addCoordinateSystem (1.0);
     viewer->initCameraParameters ();
     
