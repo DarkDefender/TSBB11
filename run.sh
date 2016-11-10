@@ -39,7 +39,6 @@ mv KeyFrameTrajectory.txt ../data
 cd ..
 
 #Rectify keyframe images
-cd rectify_map
 
 mkdir -p data/lrect
 mkdir -p data/rrect
@@ -49,10 +48,10 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	printf -v number "%04d" ${number%.*}
 #	echo $number
 	fname=$number.png
-	./undistort_rectify -l ../data/left/"$fname" -r ../data/right/"$fname" -c $3 -L ../data/lrect2/"$fname" -R ../data/rrect/"$fname"
+	stereo-calibration/build/undistort_rectify -l ../data/left/"$fname" -r ../data/right/"$fname" -c $3 -L ../data/lrect2/"$fname" -R ../data/rrect/"$fname"
 done < "../data/KeyFrameTrajectory.txt"
 
-cd ..
+cd ../../
 
 #Create disp files
 mkdir -p data/disp
@@ -71,7 +70,7 @@ mkdir -p data/pcd/
 
 for filename in data/disp/*.png; do 
 	base=$(basename $filename) 
-	./3drecon/disp2cloud data/left/$base $filename $3
+	3drecon/disp2cloud data/left/$base $filename $3
 done
 
 #Merge all PCDs

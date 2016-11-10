@@ -8,3 +8,6 @@
 	path = ORB_SLAM2
 	url = https://github.com/DarkDefender/ORB_SLAM2.git
 	branch = tsbb11
+[submodule "stereo-calibration"]
+	path = stereo-calibration
+	url = https://github.com/DarkDefender/stereo-calibration.git
