@@ -122,14 +122,9 @@ main (int argc, char** argv)
     reader.read<pcl::PointXYZRGB> (argv[2], *oldCloud);
     reader.read<pcl::PointXYZRGB> (argv[3], *cloudPoses);
     
-    //TEMPORARY
-  //  Eigen::Quaternionf Q2(0.967791975, -0.050624952, 0.245877609, 0.018973112);
-  //  Eigen::Matrix<float, 3, 1> trans2;
-  //  trans2 << -1.636660933, 0.150365740, 0.651330590;
-    
-    Eigen::Quaternionf Q2(atof(argv[10]), atof(argv[7]),atof(argv[8]),atof(argv[9]));
-    Eigen::Matrix<float, 3, 1> trans2;
-    trans2 << atof(argv[4]), atof(argv[5]),atof(argv[6]);
+    Eigen::Quaternionf Q(atof(argv[10]), atof(argv[7]),atof(argv[8]),atof(argv[9]));
+    Eigen::Matrix<float, 3, 1> trans;
+    trans << atof(argv[4]), atof(argv[5]),atof(argv[6]);
 
     //Crop
  //   pcl::PointCloud<pcl::PointXYZRGB>::Ptr finalCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -137,7 +132,7 @@ main (int argc, char** argv)
     
     //Translate
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    translatePointCloud(newCloud,transCloud,Q2,trans2);
+    translatePointCloud(newCloud,transCloud,Q,trans);
     
     //Crop
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cropAndTransCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -145,7 +140,7 @@ main (int argc, char** argv)
     
     //VoxelGrid filtering
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    voxelGridFiltering(cropAndTransCloud,filteredCloud,0.005f);
+    voxelGridFiltering(cropAndTransCloud,filteredCloud,0.01f);
     
     std::cout<<"size before crop: "<< newCloud->size()<<std::endl;
     std::cout<<"size after crop and filt: "<< filteredCloud->size()<<std::endl;
@@ -162,14 +157,8 @@ main (int argc, char** argv)
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
     
-   // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> redColor(cloudPoses, 255, 0, 0);
-    //pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> greenColor(oldCloud, 0, 255, 0);
-//    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> cyanColor(cropCloud, 0, 255, 255);
-    
-    
     viewer->addPointCloud(cloudPoses, "cameraPath");
     viewer->addPointCloud(oldCloud, "oldCloud");
- //   viewer->addPointCloud(cropCloud, cyanColor, "newCropedCloud");
     
     viewer->addCoordinateSystem (1.0);
     viewer->initCameraParameters ();
