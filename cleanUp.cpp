@@ -92,6 +92,6 @@ main (int argc, char** argv)
         boost::this_thread::sleep (boost::posix_time::microseconds (100000));
     }
     
-    pcl::io::savePCDFile ("../pcdfile/finalCloud.pcd", *cloudVoxelFilt);
+    pcl::io::savePCDFile ("finalCloud_clean.pcd", *cloudVoxelFilt, true);
     return (0);
 }

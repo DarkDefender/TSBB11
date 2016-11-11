@@ -13,16 +13,18 @@ echo $3
 
 #TODO Make sure we handle absolute input paths correctly
 
-##exit 0
+#exit 0
 
 #Preprocess input image data
 
 mkdir -p data/left
 mkdir -p data/right
 
-ffmpeg -i $1 data/left/%04d.png
+ffmpeg -i $1 data/left/%04d.png &
 
-ffmpeg -i $2 data/right/%04d.png
+ffmpeg -i $2 data/right/%04d.png &
+
+wait
 
 for filename in data/left/*.png; do
 	base=$(basename $filename) 
@@ -57,10 +59,21 @@ done < "data/KeyFrameTrajectory.txt"
 mkdir -p data/disp
 cd data/disp
 
+iter=0
+
 for filename in ../lrect/*.png; do
+
+    echo Creating a disparity map for $filename
+
+    if (( "$iter" > 2 )) ; then
+    	wait
+		iter=0
+	fi
 	base=$(basename $filename) 
-	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base  
-	mv ${base%.*}_left_disparity.png $base
+	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &&\
+	mv ${base%.*}_left_disparity.png $base &
+
+	iter=$((iter+1))
 done
 
 cd ../../
@@ -71,7 +84,7 @@ cd data/pcd
 
 for filename in ../disp/*.png; do 
 	base=$(basename $filename) 
-	../../3drecon/disp2cloud ../left/$base $filename $3
+	../../3drecon/disp2cloud ../left/$base $filename ../../$3
 done
 
 cd ../../
@@ -92,7 +105,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	build/cutting2 data/pcd/$pcdname finalCloud.pcd camerapos.pcd $trans
 done < "data/KeyFrameTrajectory.txt" 
 
-#build/cleanUp finalCloud.pcd 0.01 15 0.01
+#build/cleanup finalCloud.pcd 0.01 15 0.01
 
 #Mesh final PCD
 
