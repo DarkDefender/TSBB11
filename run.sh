@@ -14,7 +14,8 @@ echo $3
 #TODO Make sure we handle absolute input paths correctly
 
 #exit 0
-
+# remove data folder
+rm -r data
 #Preprocess input image data
 
 mkdir -p data/left
@@ -31,7 +32,7 @@ for filename in data/left/*.png; do
 	echo ${base%.*} >> data/timestamps.txt
 done
 
-Run orb slam 2 to extract camera path
+#Run orb slam 2 to extract camera path
 
 cd ORB_SLAM2
 
@@ -65,7 +66,7 @@ for filename in ../lrect/*.png; do
 
     echo Creating a disparity map for $filename
 
-    if (( "$iter" > 2 )) ; then
+    if (( "$iter" > 1 )) ; then
     	wait
 		iter=0
 	fi
@@ -75,6 +76,8 @@ for filename in ../lrect/*.png; do
 
 	iter=$((iter+1))
 done
+# wait for last disparity maps
+wait
 
 cd ../../
 
@@ -105,9 +108,10 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	build/cutting2 data/pcd/$pcdname finalCloud.pcd camerapos.pcd $trans
 done < "data/KeyFrameTrajectory.txt" 
 
-#build/cleanup finalCloud.pcd 0.01 15 0.01
+build/cleanup finalCloud.pcd 0.01 8 0.01
 
 #Mesh final PCD
 
 
 #Open blender to calc volume
+
