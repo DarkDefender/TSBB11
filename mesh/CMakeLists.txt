@@ -10,5 +10,5 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable (concaveHull concaveHull.cpp)
+add_executable (concaveHull poisson.cpp)
 target_link_libraries (concaveHull ${PCL_LIBRARIES} popt)
