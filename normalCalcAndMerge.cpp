@@ -59,8 +59,8 @@ main (int argc, char **argv)
     *oldCloud += *cloud_with_normals;
     
     std::cout<<"size of final cloud: "<< oldCloud->size()<<std::endl;
-    
-    // ---------------
+	pcl::io::savePCDFile (argv[2], *oldCloud, true); 
+	// ---------------
     // Visualize
     // ---------------
   /*  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
