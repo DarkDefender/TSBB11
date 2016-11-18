@@ -105,8 +105,33 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 #	echo $number
 	echo $trans
 	pcdname=$number.pcd
-	build/cutting2 data/pcd/$pcdname finalCloud.pcd camerapos.pcd $trans
-done < "data/KeyFrameTrajectory.txt" 
+	build/cutting2 data/pcd/$pcdname camerapos.pcd $trans
+done < "data/KeyFrameTrajectory.txt"
+
+for filename in data/pcd/*.pcd; do
+
+    echo Using mls to smooth $filename
+
+    if (( "$iter" > 2 )) ; then
+        wait
+        iter=0
+    fi
+    pcl_mls_smoothing $filename $filename -radius 0.03 -use_polynomial_fit 1 &
+
+    iter=$((iter+1))
+done
+
+wait
+
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    number=$(echo "$line" | awk '{print $1;}')
+    trans=$(echo "$line"  | awk '{$1=""; print $0}')
+    printf -v number "%04d" ${number%.*}
+    #	echo $number
+    echo $trans
+    pcdname=$number.pcd
+    build/merge data/pcd/$pcdname finalCloud.pcd 0.03 $trans
+done < "data/KeyFrameTrajectory.txt"
 
 build/cleanup finalCloud.pcd 0.01 8 0.01
 
