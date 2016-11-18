@@ -5,3 +5,6 @@ find_package(OpenCV REQUIRED)
 
 add_executable(${PROJECT_NAME} frametopcd.cc)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+
+add_executable(orbsetting calibtoorb.cc)
+target_link_libraries(orbsetting ${OpenCV_LIBS})
