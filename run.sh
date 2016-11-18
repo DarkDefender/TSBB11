@@ -15,7 +15,7 @@ echo $3
 
 #exit 0
 # remove data folder
-rm -r data
+# rm -r data
 #Preprocess input image data
 
 mkdir -p data/left
@@ -87,7 +87,7 @@ cd data/pcd
 
 for filename in ../disp/*.png; do 
 	base=$(basename $filename) 
-	../../3drecon/disp2cloud ../left/$base $filename ../../$3
+	../../3drecon/disp2cloud ../lrect/$base $filename ../../$3
 done
 
 cd ../../
