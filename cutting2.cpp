@@ -114,21 +114,15 @@ main (int argc, char** argv)
     
     //Create point cloud ptrs
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr newCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr oldCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPoses (new pcl::PointCloud<pcl::PointXYZRGB>);
 
     pcl::PCDReader reader;
     reader.read<pcl::PointXYZRGB> (argv[1], *newCloud);
-    reader.read<pcl::PointXYZRGB> (argv[2], *oldCloud);
-    reader.read<pcl::PointXYZRGB> (argv[3], *cloudPoses);
+    reader.read<pcl::PointXYZRGB> (argv[2], *cloudPoses);
     
-    Eigen::Quaternionf Q(atof(argv[10]), atof(argv[7]),atof(argv[8]),atof(argv[9]));
+    Eigen::Quaternionf Q(atof(argv[9]), atof(argv[6]),atof(argv[7]),atof(argv[8]));
     Eigen::Matrix<float, 3, 1> trans;
-    trans << atof(argv[4]), atof(argv[5]),atof(argv[6]);
-
-    //Crop
- //   pcl::PointCloud<pcl::PointXYZRGB>::Ptr finalCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    //cropPoints(oldCloud,finalCloud,cloudPoses); //input,output,camerapath
+    trans << atof(argv[3]), atof(argv[4]),atof(argv[5]);
     
     //Translate
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -144,12 +138,7 @@ main (int argc, char** argv)
     
     std::cout<<"size before crop: "<< newCloud->size()<<std::endl;
     std::cout<<"size after crop and filt: "<< filteredCloud->size()<<std::endl;
-    std::cout<<"size of old cloud: "<< oldCloud->size()<<std::endl;
     
-    //merge clouds
-    *oldCloud += *filteredCloud;
-    
-    std::cout<<"size of final cloud: "<< oldCloud->size()<<std::endl;
     
     // ---------------
     // Visualize
@@ -169,6 +158,6 @@ main (int argc, char** argv)
         boost::this_thread::sleep (boost::posix_time::microseconds (100000));
     }
     */
-    pcl::io::savePCDFile ("finalCloud.pcd", *oldCloud, true);
+    pcl::io::savePCDFile (argv[1], *filteredCloud, true);
     return (0);
 }

@@ -9,6 +9,7 @@ list( APPEND CMAKE_CXX_FLAGS "-Wall -ggdb -std=c++14 ${CMAKE_CXX_FLAGS}")
 
 #add_subdirectory(libs)
 add_executable(${PROJECT_NAME} cutting2.cpp)
+add_executable(merge normalCalcAndMerge.cpp)
 add_executable(cleanup cleanUp.cpp)
 
 include(FindPkgConfig)
@@ -22,4 +23,6 @@ include_directories(SYSTEM
 target_link_libraries(${PROJECT_NAME}
 	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(cleanup
+	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(merge
 	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})

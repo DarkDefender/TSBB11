@@ -21,12 +21,12 @@
 // Filtering with VoxelGrid
 // ----------------
 
-void voxelGridFiltering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr inputCloud,
-                        pcl::PointCloud<pcl::PointXYZRGB>::Ptr outputCloud,
+void voxelGridFiltering(pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr inputCloud,
+                        pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr outputCloud,
                         float leafSize){
     
     // Create the filtering object
-    pcl::VoxelGrid<pcl::PointXYZRGB> sor;
+    pcl::VoxelGrid<pcl::PointXYZRGBNormal> sor;
     sor.setInputCloud (inputCloud);
     sor.setLeafSize (leafSize, leafSize, leafSize);
     sor.filter (*outputCloud);
@@ -35,12 +35,12 @@ void voxelGridFiltering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr inputCloud,
 // ----------------
 // Radius Outlier Removal
 // ----------------
-void radiusFiltering(pcl::PointCloud<pcl::PointXYZRGB>::Ptr inputCloud,
-                     pcl::PointCloud<pcl::PointXYZRGB>::Ptr outputCloud,
+void radiusFiltering(pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr inputCloud,
+                     pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr outputCloud,
                      float radius,
                      int minNeighbors){
     
-    pcl::RadiusOutlierRemoval<pcl::PointXYZRGB> outrem;
+    pcl::RadiusOutlierRemoval<pcl::PointXYZRGBNormal> outrem;
     outrem.setInputCloud(inputCloud);
     outrem.setRadiusSearch(radius);
     outrem.setMinNeighborsInRadius (minNeighbors);
@@ -60,12 +60,12 @@ main (int argc, char** argv)
         exit(0);
     }
     
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudRadiusFilt (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudVoxelFilt (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloudRadiusFilt (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloudVoxelFilt (new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     
     pcl::PCDReader reader;
-    reader.read<pcl::PointXYZRGB> (argv[1], *cloud);
+    reader.read<pcl::PointXYZRGBNormal> (argv[1], *cloud);
     float radius = atof(argv[2]);
     int minNeighbors = atoi(argv[3]);
     float leafSize = atof(argv[4]);
