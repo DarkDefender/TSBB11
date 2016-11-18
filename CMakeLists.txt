@@ -12,7 +12,6 @@ add_executable(${PROJECT_NAME} cutting2.cpp)
 add_executable(cleanup cleanUp.cpp)
 
 include(FindPkgConfig)
-
 pkg_search_module(OPENCV REQUIRED opencv)
 find_package(PCL 1.2 REQUIRED)
 

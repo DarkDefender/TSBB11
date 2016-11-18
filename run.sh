@@ -15,7 +15,7 @@ echo $3
 
 #exit 0
 # remove data folder
-rm -r data
+#rm -r data
 #Preprocess input image data
 
 mkdir -p data/left
@@ -33,15 +33,17 @@ for filename in data/left/*.png; do
 done
 
 #Run orb slam 2 to extract camera path
+unamestr=`uname`
+if [[ "$unamestr" != 'Darwin' ]]; then
+	cd ORB_SLAM2
 
-cd ORB_SLAM2
+	./Examples/Stereo/stereo_saab Vocabulary/ORBvoc.txt ../$3 ../data/left ../data/right ../data/timestamps.txt
 
-./Examples/Stereo/stereo_saab Vocabulary/ORBvoc.txt ../$3 ../data/left ../data/right ../data/timestamps.txt
+	mv CameraTrajectory.txt ../data
+	mv KeyFrameTrajectory.txt ../data
 
-mv CameraTrajectory.txt ../data
-mv KeyFrameTrajectory.txt ../data
-
-cd ..
+	cd ..
+fi
 
 #Rectify keyframe images
 
