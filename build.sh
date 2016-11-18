@@ -5,9 +5,12 @@ cmake ./OpenCVReprojectImageToPointCloud
 make
 cd ..
 # build ORB-SLAM
-cd ORB_SLAM2
-sh build.sh
-cd ..
+unamestr=`uname`
+if [[ "$unamestr" != 'Darwin' ]]; then
+	cd ORB_SLAM2
+	sh build.sh
+	cd ..
+fi
 # build calibration
 cd stereo-calibration
 mkdir build

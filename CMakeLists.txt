@@ -13,7 +13,6 @@ add_executable(merge normalCalcAndMerge.cpp)
 add_executable(cleanup cleanUp.cpp)
 
 include(FindPkgConfig)
-
 pkg_search_module(OPENCV REQUIRED opencv)
 find_package(PCL 1.2 REQUIRED)
 
