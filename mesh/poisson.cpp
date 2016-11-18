@@ -33,6 +33,7 @@ main (int argc, char **argv)
     
     io::loadPCDFile (argv[1], *cloud);
     
+    
   /*  MovingLeastSquares<PointXYZ, PointXYZ> mls;
     mls.setInputCloud (cloud);
     mls.setSearchRadius (0.1);
