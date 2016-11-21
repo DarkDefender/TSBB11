@@ -1,8 +1,8 @@
 #!/bin/bash 
-if (( $# != 2 )); then
+if (( $# != 3 )); then
     echo "Illegal number of parameters"
 	echo "Usage:"
-	echo "$0 <left_img_seq>.avi <right_img_seq>.avi"
+	echo "$0 <left_img_seq>.avi <right_img_seq>.avi <orb_settings>.yml"
 	exit 2
 fi
 echo Running stereo calibration with parameters:
@@ -31,7 +31,12 @@ stereo-calibration/build/calibrate_stereo -l data/calib/left/%d.png -r data/cali
 # usage: calibrate_stereo -l left_seq -r right_seq -u left_calib -v right_calib -o output
 
 echo adding ORB-SLAM parameters
-frametxttopcd/build/orbsetting data/calib/stereo_cam.yml ORB_SLAM2/Examples/Stereo/ORB_SETTINGS.yml stereo_cam.yml
+frametxttopcd/build/orbsetting data/calib/stereo_cam.yml $3 data/calib/proc_stereo_cam.yml
+rm stereo_cam.yml
+touch stereo_cam.yml
+cat $3 >> stereo_cam.yml
+cat data/calib/proc_stereo_cam.yml >> stereo_cam.yml
+cat data/calib/stereo_cam.yml >> stereo_cam.yml
 
 # replace underscore with dot
 sed -i -e 's/_/./g' stereo_cam.yml
