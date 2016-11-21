@@ -111,6 +111,10 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 	build/cutting2 data/pcd/$pcdname camerapos.pcd $trans
 done < "data/KeyFrameTrajectory.txt"
 
+pcl_concatenate_points_pcd data/pcd/*
+
+mv output.pcd rgb_cloud.pcd
+
 for filename in data/pcd/*.pcd; do
 
     echo Using mls to smooth $filename
@@ -136,10 +140,17 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     build/merge data/pcd/$pcdname finalCloud.pcd 0.03 $trans
 done < "data/KeyFrameTrajectory.txt"
 
-build/cleanup finalCloud.pcd 0.01 8 0.01
+echo Cleaning pointcloud
+build/cleanup finalCloud.pcd 0.01 8 0.01 0 #change from 0 to ~1.1 for shadowfiltering
+echo Done!
 
 #Mesh final PCD
 
+echo Generating mesh
+pcl_poisson_reconstruction finalCloud_clean.pcd output.vtk
+pcl_vtk2obj output.vtk mesh.obj
+rm output.vtk
+echo Done
 
 #Open blender to calc volume
 

@@ -9,4 +9,7 @@ include(FindPkgConfig)
 pkg_search_module(OPENCV REQUIRED opencv)
 include_directories(${OPENCV_INCLUDE_DIRS})
 add_executable(${PROJECT_NAME} frametopcd.cc)
+
+add_executable(orbsetting calibtoorb.cc)
+target_link_libraries(orbsetting ${OPENCV_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${OPENCV_LIBRARIES})

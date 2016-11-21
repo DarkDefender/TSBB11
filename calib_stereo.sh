@@ -30,4 +30,10 @@ echo calibrating stereo parameters...
 stereo-calibration/build/calibrate_stereo -l data/calib/left/%d.png -r data/calib/right/%d.png -u data/calib/l_cam.yml -v data/calib/r_cam.yml -o data/calib/stereo_cam.yml
 # usage: calibrate_stereo -l left_seq -r right_seq -u left_calib -v right_calib -o output
 
+echo adding ORB-SLAM parameters
+frametxttopcd/build/orbsetting data/calib/stereo_cam.yml ORB_SLAM2/Examples/Stereo/ORB_SETTINGS.yml stereo_cam.yml
+
+# replace underscore with dot
+sed -i -e 's/_/./g' stereo_cam.yml
+
 echo done!
