@@ -141,7 +141,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 done < "data/KeyFrameTrajectory.txt"
 
 echo Cleaning pointcloud
-build/cleanup finalCloud.pcd 0.01 8 0.01
+build/cleanup finalCloud.pcd 0.01 8 0.01 0 #change from 0 to ~1.1 for shadowfiltering
 echo Done!
 
 #Mesh final PCD
