@@ -20,7 +20,7 @@ int main(int argc, char** argv){
 	cv::Mat	F,E,R,R1,R2,P1,P2,Q; // camera extrinsics
 	std::vector<float> T; 
     /* read calibration settings */
-	std::cout << "READING CAMERA PARAMETERS FROM " << argv[1] << std::endl;
+	std::cout << "Reading calibration file " << argv[1] << std::endl;
 	fs_calib["K1"] >> K1;
 	fs_calib["K2"] >> K2;
 	fs_calib["D1"] >> D1;
@@ -35,13 +35,15 @@ int main(int argc, char** argv){
 	fs_calib["P2"] >> P2;
 	fs_calib["Q"] >> Q;
 
-	std::cout << "READING CAM PROPS" << std::endl;
+	//std::cout << "READING CAM PROPS" << std::endl;
 	int l_width, l_height, r_width, r_height;
 	float fps;
-	fs_calib["LEFT_WIDTH"] >> l_width;
-	fs_calib["LEFT_HEIGHT"] >> l_height;
-	fs_calib["RIGHT_WIDTH"] >> r_width;
-	fs_calib["RIGHT_HEIGHT"] >> r_height;
+	/*
+	fs_calib["LEFT_width"] >> l_width;
+	fs_calib["LEFT_height"] >> l_height;
+	fs_calib["RIGHT_width"] >> r_width;
+	fs_calib["RIGHT_height"] >> r_height;
+	*/
 	fs_calib["fps"] >> fps;
 	/* read orb-slam settings 
 	std::cout << "READING ORB_SLAM SETTINGS FROM " << argv[2] << std::endl;
@@ -71,7 +73,7 @@ int main(int argc, char** argv){
 	 write settings and cailbration parameters to file */
 	
 	cv::FileStorage out(argv[3], cv::FileStorage::WRITE);
-	std::cout << "WRITING OUTPUT TO FILE " << argv[3] << std::endl;
+	std::cout << "Writing output to file " << argv[3] << std::endl;
     /* write calibration settings */
  	/*
 	out << "K1" <<  K1;
@@ -89,10 +91,10 @@ int main(int argc, char** argv){
  	out << "Q"  <<  Q; */
 
 	/* write orb-slam parameters */
-	out << "LEFT_width" << l_width;
+	/*out << "LEFT_width" << l_width;
 	out << "LEFT_height" << l_height;
 	out << "RIGHT_width" << r_width;
-	out << "RIGHT_height" << r_height;
+	out << "RIGHT_height" << r_height; */
  
 	out << "Camera_width" << l_width;
 	out << "Camera_height" << l_height;
