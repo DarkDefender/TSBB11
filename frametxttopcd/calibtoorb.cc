@@ -20,7 +20,7 @@ int main(int argc, char** argv){
 	cv::Mat	F,E,R,R1,R2,P1,P2,Q; // camera extrinsics
 	std::vector<float> T; 
     /* read calibration settings */
-	std::cout << "READING CAMERA PARAMETERS FROM " << argv[1] << std::endl;
+	std::cout << "Reading calibration file " << argv[1] << std::endl;
 	fs_calib["K1"] >> K1;
 	fs_calib["K2"] >> K2;
 	fs_calib["D1"] >> D1;
@@ -35,15 +35,17 @@ int main(int argc, char** argv){
 	fs_calib["P2"] >> P2;
 	fs_calib["Q"] >> Q;
 
-	std::cout << "READING CAM PROPS" << std::endl;
+	//std::cout << "READING CAM PROPS" << std::endl;
 	int l_width, l_height, r_width, r_height;
 	float fps;
-	fs_calib["LEFT.width"] >> l_width;
-	fs_calib["LEFT.height"] >> l_height;
-	fs_calib["RIGHT.width"] >> r_width;
-	fs_calib["RIGHT.height"] >> r_height;
-	fs_calib["Camera.fps"] >> fps;
-	/* read orb-slam settings */
+	/*
+	fs_calib["LEFT_width"] >> l_width;
+	fs_calib["LEFT_height"] >> l_height;
+	fs_calib["RIGHT_width"] >> r_width;
+	fs_calib["RIGHT_height"] >> r_height;
+	*/
+	fs_calib["fps"] >> fps;
+	/* read orb-slam settings 
 	std::cout << "READING ORB_SLAM SETTINGS FROM " << argv[2] << std::endl;
 	int ThDepth, orb_nFeatures, orb_nlevels, orb_iniThFast, orb_minThFast;
 	float orb_scale;
@@ -54,7 +56,7 @@ int main(int argc, char** argv){
     orb_options["ORBextractor.iniThFAST"] >> orb_iniThFast;
 	orb_options["ORBextractor.minThFAST"] >> orb_minThFast;
 
-    /* read orb-slam viewer settings */
+    read orb-slam viewer settings 
 	int v_width, v_psize, v_vpf, v_cwidth, v_vpx;
 	float v_kfs, v_gwidth, v_csize, v_vpy, v_vpz;
 	orb_options["Viewer.KeyFrameSize"] >> v_kfs;
@@ -68,12 +70,13 @@ int main(int argc, char** argv){
 	orb_options["Viewer.ViewpointZ"] >> v_vpz;
 	orb_options["Viewer.ViewpointF"] >> v_vpf; 
 	
-	/* write settings and cailbration parameters to file */
+	 write settings and cailbration parameters to file */
 	
 	cv::FileStorage out(argv[3], cv::FileStorage::WRITE);
-	std::cout << "WRINTING OUTPUT TO FILE " << argv[3] << std::endl;
+	std::cout << "Writing output to file " << argv[3] << std::endl;
     /* write calibration settings */
- 	out << "K1" <<  K1;
+ 	/*
+	out << "K1" <<  K1;
  	out << "K2" <<  K2;
  	out << "D1" <<  D1;
  	out << "D2" <<  D2;
@@ -85,13 +88,13 @@ int main(int argc, char** argv){
  	out << "R2" <<  R2;
  	out << "P1" <<  P1;
  	out << "P2" <<  P2;
- 	out << "Q"  <<  Q; 
+ 	out << "Q"  <<  Q; */
 
 	/* write orb-slam parameters */
-	out << "LEFT_WIDTH" << l_width;
-	out << "LEFT_HEIGHT" << l_height;
-	out << "RIGHT_WIDTH" << r_width;
-	out << "RIGHT_HEIGHT" << r_height;
+	/*out << "LEFT_width" << l_width;
+	out << "LEFT_height" << l_height;
+	out << "RIGHT_width" << r_width;
+	out << "RIGHT_height" << r_height; */
  
 	out << "Camera_width" << l_width;
 	out << "Camera_height" << l_height;
@@ -107,10 +110,12 @@ int main(int argc, char** argv){
  	out << "Camera_p1" << 0.0;
  	out << "Camera_p2" << 0.0;
 
-	out << "Camera_bf" << P2.at<double>(1,4);
-	out << "Camera_RGB" << 0;
-	out << "ThDepth" << ThDepth;
+	out << "Camera_bf" << fabs(P2.at<double>(0,3));
 	
+	// out << "Camera_RGB" << 0;
+	// out << "ThDepth" << ThDepth;
+	
+	/* echo in script instead!
 	out << "ORBextractor_nFeatures" << orb_nFeatures;
 	out << "ORBextractor_scaleFactor" << orb_scale;
 	out << "ORBextractor_nLevels" << orb_nlevels;
@@ -118,7 +123,7 @@ int main(int argc, char** argv){
 	out << "ORBextractor_iniThFAST" << orb_iniThFast;
 	out << "ORBextractor_minThFAST" << orb_minThFast;
 
-	/* Viewer Parameters */
+	// Viewer Parameters
 	out << "Viewer_KeyFrameSize"		<< v_kfs;
 	out << "Viewer_KeyFrameLineWidth"	<< v_width;
 	out << "Viewer_GraphLineWidth"		<< v_gwidth;
@@ -129,73 +134,6 @@ int main(int argc, char** argv){
 	out << "Viewer_ViewpointY"			<< v_vpy;
 	out << "Viewer_ViewpointZ"			<< v_vpz;
 	out << "Viewer_ViewpointF"			<< v_vpf;
-
+    */
     return 0;
 }	
-/*
-#--------------------------------------------------------------------------------------------
-# Camera Parameters for ORB-SLAM. Adjust them!
-#--------------------------------------------------------------------------------------------
-
-# Camera calibration and distortion parameters (OpenCV) 
-Camera.fx: 933.44407326729231 # =LEFT.P(0,0)
-Camera.fy: 933.44407326729231 # =LEFT.P(1,1)
-Camera.cx: 735.62555694580078 # =LEFT.P(0,2)
-Camera.cy: 632.28582382202148 # =LEFT.P(1,2)
-
-Camera.k1: 0.0
-Camera.k2: 0.0
-Camera.p1: 0.0
-Camera.p2: 0.0
-
-Camera.width: 1536
-Camera.height: 1088
-
-# Camera frames per second 
-Camera.fps: 20.0 #20.0
-
-# stereo baseline times fx
-Camera.bf: 395.3439947700014 # =RIGHT.P(1,4) (=norm(T)*fx)
-
-# Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
-Camera.RGB: 1
-
-# Close/Far threshold. Baseline times.
-ThDepth: 35
-
-
- #--------------------------------------------------------------------------------------------
-# ORB Parameters
-#--------------------------------------------------------------------------------------------
-
-# ORB Extractor: Number of features per image
-ORBextractor.nFeatures: 4000
-
-# ORB Extractor: Scale factor between levels in the scale pyramid
-ORBextractor.scaleFactor: 1.2
-
-# ORB Extractor: Number of levels in the scale pyramid
-ORBextractor.nLevels: 12
-
-# ORB Extractor: Fast threshold
-# Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
-# Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
-# You can lower these values if your images have low contrast			
-ORBextractor.iniThFAST: 20
-ORBextractor.minThFAST: 7
-
-#--------------------------------------------------------------------------------------------
-# Viewer Parameters
-#--------------------------------------------------------------------------------------------
-Viewer.KeyFrameSize: 0.05
-Viewer.KeyFrameLineWidth: 1
-Viewer.GraphLineWidth: 0.9
-Viewer.PointSize: 2
-Viewer.CameraSize: 0.08
-Viewer.CameraLineWidth: 3
-Viewer.ViewpointX: 0
-Viewer.ViewpointY: -0.7
-Viewer.ViewpointZ: -1.8
-Viewer.ViewpointF: 500 
-
-*/
