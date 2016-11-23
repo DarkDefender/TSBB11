@@ -56,8 +56,9 @@ void shadowFiltering(pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr inputCloud,
                      float threshold){
     
     pcl::ShadowPoints<pcl::PointXYZRGBNormal,pcl::PointXYZRGBNormal> shadRem(true);
-    shadRem.setInputCloud(inputCloud);
+    
     shadRem.setNormals(inputCloud);
+    shadRem.setInputCloud(inputCloud);
     shadRem.setThreshold(threshold);
     shadRem.filter(*outputCloud);
 }
@@ -65,14 +66,14 @@ void shadowFiltering(pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr inputCloud,
 int
 main (int argc, char** argv)
 {
-    if (argc != 6)
+    if (argc != 5)
     {
         std::cerr << "need to specify: " << std::endl;
         std::cerr << "pointCloud (.pcd)" << std::endl;
         std::cerr << "radius (float)" << std::endl;
         std::cerr << "minNeighbors (int)" << std::endl;
         std::cerr << "leafSize (float)" << std::endl;
-        std::cerr << "shadFiltThresh (float)" << std::endl;
+    //    std::cerr << "shadFiltThresh (float)" << std::endl;
         exit(0);
     }
     
@@ -86,16 +87,20 @@ main (int argc, char** argv)
     float radius = atof(argv[2]);
     int minNeighbors = atoi(argv[3]);
     float leafSize = atof(argv[4]);
-    float threshold = atof(argv[5]);
+  //  float threshold = atof(argv[5]);
     
-    //shadowpoint filtering
+   /* //shadowpoint filtering
     shadowFiltering(cloud,cloudShadowFilt,threshold);
     
     std::cout << "cloud size: " << cloud->size() << std::endl;
     std::cout << "cloud after shadow filt: " << cloudShadowFilt->size() << std::endl;
     
+    */
+    
     //Radius filtering
-    radiusFiltering(cloudShadowFilt,cloudRadiusFilt,radius, minNeighbors);
+    radiusFiltering(cloud,cloudRadiusFilt,radius, minNeighbors);
+    
+    std::cout << "cloud after radi: " << cloudRadiusFilt->size() << std::endl;
     
     //Voxel Filtering
     voxelGridFiltering(cloudRadiusFilt,cloudVoxelFilt,leafSize);
