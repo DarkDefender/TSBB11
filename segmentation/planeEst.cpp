@@ -26,16 +26,16 @@
 int
 main (int argc, char** argv)
 {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_projected(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBNormal>);
+    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_projected(new pcl::PointCloud<pcl::PointXYZRGBNormal>);
     
     pcl::PCDReader reader;
-    reader.read<pcl::PointXYZRGB> (argv[1], *cloud);
+    reader.read<pcl::PointXYZRGBNormal> (argv[1], *cloud);
 
     pcl::ModelCoefficients::Ptr coefficients (new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
     // Create the segmentation object
-    pcl::SACSegmentation<pcl::PointXYZRGB> seg;
+    pcl::SACSegmentation<pcl::PointXYZRGBNormal> seg;
     // Optional
     seg.setOptimizeCoefficients (true);
     // Mandatory
@@ -46,8 +46,15 @@ main (int argc, char** argv)
     seg.setInputCloud (cloud);
     seg.segment (*inliers, *coefficients);
     
+    std::cout << coefficients->values[0] << std::endl;
+    std::cout << coefficients->values[1] << std::endl;
+    std::cout << coefficients->values[2] << std::endl;
+    std::cout << coefficients->values[3] << std::endl;
     
-    pcl::ProjectInliers<pcl::PointXYZRGB> proj;
+    
+    
+    
+ /*   pcl::ProjectInliers<pcl::PointXYZRGBNormal> proj;
     proj.setModelType (pcl::SACMODEL_PLANE);
     proj.setIndices (inliers);
     proj.setInputCloud (cloud);
@@ -59,6 +66,7 @@ main (int argc, char** argv)
         PCL_ERROR ("Could not estimate a planar model for the given dataset.");
         return (-1);
     }
+  */
     
     // ---------------
     // Visualize
@@ -66,9 +74,9 @@ main (int argc, char** argv)
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
     
-    viewer->addPointCloud(cloud,"cloud");
-    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGB> single_color(cloud_projected, 255, 0, 0);
-    viewer->addPointCloud(cloud_projected,single_color, "filtCloud");
+    viewer->addPointCloud<pcl::PointXYZRGBNormal>(cloud,"cloud");
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZRGBNormal> single_color(cloud_projected, 255, 0, 0);
+ //   viewer->addPointCloud<pcl::PointXYZRGBNormal>(cloud_projected,single_color, "filtCloud");
     
     viewer->addCoordinateSystem (1.0);
     viewer->initCameraParameters ();
