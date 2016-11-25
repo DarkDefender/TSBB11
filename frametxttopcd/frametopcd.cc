@@ -17,7 +17,7 @@ void SaveCameraTrajectoryToPCD(const string &filein, const string &fileout){
 		cameraPoses.push_back(cv::Point3d(x,y,z));
 	}
 	fin.close();
-    cout << cameraPoses.size();
+    //cout << cameraPoses.size() << std::endl;
 	ofstream fout;
 	fout.open(fileout.c_str());
  	fout << fixed;
