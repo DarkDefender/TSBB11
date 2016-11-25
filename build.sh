@@ -38,3 +38,10 @@ cd build
 cmake ../
 make
 cd ..
+# build disparity map
+cd dispmap
+mkdir build
+cd build
+cmake ..
+make
+cd ../../
