@@ -7,9 +7,14 @@ endif()
 
 include(FindPkgConfig)
 pkg_search_module(OPENCV REQUIRED opencv)
-include_directories(${OPENCV_INCLUDE_DIRS})
+pkg_search_module(EIGEN3 REQUIRED eigen3)
+
+include_directories(${OPENCV_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
 add_executable(${PROJECT_NAME} frametopcd.cc)
 
 add_executable(orbsetting calibtoorb.cc)
 target_link_libraries(orbsetting ${OPENCV_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${OPENCV_LIBRARIES})
+
+add_executable(rotcam rotcam.cc)
+target_link_libraries(rotcam ${EIGEN3_LIBRARIES})
