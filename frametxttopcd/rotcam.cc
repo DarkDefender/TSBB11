@@ -4,8 +4,9 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
-#include <Eigen/Geometry>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Geometry>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 using namespace std;
 
 
@@ -20,45 +21,72 @@ void SaveCameraTrajectoryToPCD(const string &filein, const string &fileout){
     float t,x,y,z,q1,q2,q3,q4;
 	
     // read file
+	std::cout << "reading file:" << filein << std::endl;
+
     while(fin >> t >> x >> y >> z >> q1 >> q2 >> q3 >> q4){
         frameNum.push_back(t);
-        cQ.push_back(Eigen::Quaternion(q4,q1,q2,q3));
+        cQ.push_back(Eigen::Quaternionf(q4,q1,q2,q3));
         cPos.push_back(Eigen::Vector3f(x,y,z));
+
+		//cout << t << " " << x << " " << y << " " << z << " " << q1 << " " << q2 << " " << q3  << " " << q4 << endl;
 		//cameraPoses.push_back(cv::Point3d(x,y,z));
 	}
+	//cout << "Number of poses found = " << frameNum.size() << endl;
     
     fin.close();
     
     //calc normal
-    Eigen::Matrix3Xf points;
-    for( unsigned i = 0; i < cPos.size(); i++){
-        points << cPos[i];
+	//std::cout << "reading cam positions to matrix" << std::endl;
+    Eigen::MatrixXf points(3, cPos.size());
+    for(size_t i = 0; i < cPos.size(); i++){
+		Eigen::Vector3f p = cPos[i];
+        //cout << i << ": " << p << endl;
+		
+		points(0,i) = p(0);
+		points(1,i) = p(1);
+		points(2,i) = p(2); //<< cPos[i]; //(0), cPos[i](1), cPos[i](2);
     }
+    /*cout << "number of points = " << endl;
+	cout << points.rows() << "x" <<points.cols() << endl;
+	cout << "matrix content = " << endl << points << endl;
+
+	std::cout << "Mean = "; // << std::endl;
+    */
+
+	Eigen::Matrix<float, 3, 1> mean = points.rowwise().mean();
+	Eigen::Translation3f trans(-mean);
+    //cout << mean << endl;
+
+	const Eigen::Matrix3Xf points_centered = points.colwise() - mean;
     
-    Eigen::Matrix<float, 3, 1> mean = points.rowwise().mean();
-    const Eigen::Matrix3Xf points_centered = points.colwise() - mean;
-    
-    int setting = Eigen::ComputeThinU | Eigen::ComputeThinV;
+    int setting = Eigen::ComputeFullU | Eigen::ComputeThinV;
     Eigen::JacobiSVD<Eigen::Matrix3Xf> svd = points_centered.jacobiSvd(setting);
     
-    auto U = svd.matrixU();
-    Eigen::Vector3d normal = U.col(2);
+	//std::cout << "extracting normal = "; // << std::endl;
+	Eigen::Matrix3f U = svd.matrixU();
+    Eigen::Vector3f normal = U.col(2);
     normal.normalize();
-    // find rot and translation
-    Eigen::Vector3f xy_plane_normal_vector(0,1,0);
+	//cout << normal << endl;
+    
+	// find rot and translation
+    Eigen::Vector3f yhat(0,1,0);
+	Eigen::Quaternionf quat_rot = Eigen::Quaternionf::FromTwoVectors(normal, yhat);
+    //cout << "Quat = " << quat_rot << endl;
+    /*
     Eigen::Vector3f rotation_vector = xy_plane_normal_vector.cross(normal);
-    float theta = -atan2(rotation_vector.norm(), xy_plane_normal_vector.dot(normal));
+    rotation_vector.normalize();
+	float theta = -atan2(rotation_vector.norm(), xy_plane_normal_vector.dot(normal));
     
     std::cout << "Rotation vector: "<< std::endl;
-    std::cout << rotation_vector(0) << std::endl;
-    std::cout << rotation_vector(1) << std::endl;
-    std::cout << rotation_vector(2) << std::endl;
+    std::cout << rotation_vector << std::endl;
+    //std::cout << rotation_vector(1) << std::endl;
+    //std::cout << rotation_vector(2) << std::endl;
     std::cout << "Rotation angle: "<< std::endl;
     std::cout << theta << std::endl;
     
     Eigen::AngleAxisf rot(theta,rotation_vector/rotation_vector.norm());
     Eigen::Quaternionf quat(rot);
-    
+    */
     //rotate
     //Eigen::
     
@@ -67,14 +95,17 @@ void SaveCameraTrajectoryToPCD(const string &filein, const string &fileout){
 	
     fout.open(fileout.c_str());
  	fout << fixed;
-	
-    for (unsigned int i; i < frameNum.size(); i++) {
-        fout << frameNum[i];
-        Eigen::Vector3f pos(cPos[i]*quat);
-        fout << pos.x -mean.x<< pos.y - mean.y << pos.z - mean.z;
-        Eigen::Quaternionf q(cQ[i]*quat);
-        fout << q.w << q.x << q.y << q.z << std::endl;
-        
+	fout << setprecision(9);
+	cout << "writing to file " << fileout << endl;
+    for (size_t i = 0; i < frameNum.size(); i++) {
+        fout << frameNum[i] << " ";
+        Eigen::Vector3f pos(cPos[i]);
+		Eigen::Vector3f newPos;
+		newPos = quat_rot*trans*pos;
+        fout << newPos(0) << " " << newPos(1) << " " << newPos(2) << " ";
+        Eigen::Quaternionf q(quat_rot*cQ[i]);
+        fout << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << std::endl;
+        //cout << frameNum[i] << " " << newPos(0) << " " << newPos(1) << " " << newPos(2) << endl;
     }
     
     
