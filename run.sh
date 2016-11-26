@@ -46,6 +46,9 @@ if [[ "$unamestr" != 'Darwin' ]]; then
 	cd ..
 fi
 
+# rotate cameras to align to xz-plane
+mv data/KeyFrameTrajectory.txt data/keyframes.bak
+frametxttopcd/build/rotcam data/keyframes.bak data/KeyFrameTrajectory.txt
 #Rectify keyframe images
 
 mkdir -p data/lrect
@@ -74,7 +77,8 @@ for filename in ../lrect/*.png; do
 		iter=0
 	fi
 	base=$(basename $filename) 
-	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &&\
+ 	#../../dispmap/disparitymap ../lrect/$base $filename ../../$3 # uncomment to use own disparity map
+	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &&\  #comment to use own disparity map
 	mv ${base%.*}_left_disparity.png $base &
 
 	iter=$((iter+1))
@@ -91,8 +95,7 @@ cd data/pcd
 
 for filename in ../disp/*.png; do 
 	base=$(basename $filename)
- 	#../../dispmap/disparitymap ../lrect/$base $filename ../../$3 # uncomment to use own disparity map
-	../../3drecon/disp2cloud ../lrect/$base $filename ../../$3 #comment to use own disparity map
+	../../3drecon/disp2cloud ../lrect/$base $filename ../../$3
 done
 
 cd ../../
