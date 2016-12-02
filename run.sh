@@ -77,8 +77,8 @@ for filename in ../lrect/*.png; do
 		iter=0
 	fi
 	base=$(basename $filename) 
- 	#../../dispmap/disparitymap ../lrect/$base $filename ../../$3 # uncomment to use own disparity map
-	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &&\  #comment to use own disparity map
+ 	#../../dispmap/disparitymap ../lrect/$base ../rrect/$base &  	# uncomment to use own disparity map
+	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &	# comment to use own disparity map
 	mv ${base%.*}_left_disparity.png $base &
 
 	iter=$((iter+1))
