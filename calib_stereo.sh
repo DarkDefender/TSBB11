@@ -31,7 +31,7 @@ stereo-calibration/build/calibrate_stereo -l data/calib/left/%d.png -r data/cali
 # usage: calibrate_stereo -l left_seq -r right_seq -u left_calib -v right_calib -o output
 
 echo adding ORB-SLAM settings...
-frametxttopcd/build/orbsetting data/calib/stereo_cam.yml $3 data/calib/orb_cam.yml
+misc/build/orbsetting data/calib/stereo_cam.yml $3 data/calib/orb_cam.yml
 
 #rm stereo_cam.yml
 #touch stereo_cam.yml
