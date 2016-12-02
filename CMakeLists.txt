@@ -12,6 +12,7 @@ add_executable(${PROJECT_NAME} cutting2.cpp)
 add_executable(merge normalCalcAndMerge.cpp)
 add_executable(cleanup cleanUp.cpp)
 add_executable(texture texture.cpp)
+add_executable(textex textex.cc)
 
 include(FindPkgConfig)
 pkg_search_module(OPENCV REQUIRED opencv)
@@ -27,4 +28,6 @@ target_link_libraries(cleanup
 target_link_libraries(merge
 	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(texture
-	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
+	${OPENCV_LIBRARIES} ${PCL_LIBRARIES}) 
+target_link_libraries(textex
+	${OPENCV_LIBRARIES} ${PCL_LIBRARIES}) 
