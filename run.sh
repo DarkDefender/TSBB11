@@ -161,4 +161,5 @@ rm output.vtk
 echo Done
 
 #Open blender to calc volume
+blender --python ./blender/myscript.py
 
