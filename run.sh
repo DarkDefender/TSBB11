@@ -165,5 +165,5 @@ pcl_obj2ply mesh.obj mesh.ply
 mesh/build/texturemapping mesh.ply data/KeyFrameTrajectory.txt stereo_cam.yml
 
 #Open blender to calc volume
-blender --python ./blender/myscript.py
+blender blender/emptyscene.blend --python blender/startup.py
 
