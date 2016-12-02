@@ -113,7 +113,7 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 #	echo $number
 	echo $trans
 	pcdname=$number.pcd
-	build/cutting2 data/pcd/$pcdname camerapos.pcd $trans data/pcd/cut/$pcdname
+	pcd_progs/build/cutting2 data/pcd/$pcdname camerapos.pcd $trans data/pcd/cut/$pcdname
 done < "data/KeyFrameTrajectory.txt"
 
 pcl_concatenate_points_pcd data/pcd/cut/*
@@ -144,12 +144,12 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     pcdname=$number.pcd
 	if [ -f data/pcd/cut/$pcdname ]
 	then
-		build/merge data/pcd/cut/$pcdname data/pcd/final/finalCloud.pcd 0.03 $trans
+		pcd_progs/build/merge data/pcd/cut/$pcdname data/pcd/final/finalCloud.pcd 0.03 $trans
 	fi
 done < "data/KeyFrameTrajectory.txt"
 
 echo Cleaning pointcloud
-build/cleanup data/pcd/final/finalCloud.pcd 0.01 8 0.01
+pcd_progs/build/cleanup data/pcd/final/finalCloud.pcd 0.01 8 0.01
 echo Done!
 
 #Mesh final PCD
