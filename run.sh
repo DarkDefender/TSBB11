@@ -27,7 +27,7 @@ ffmpeg -i $1 data/left/%04d.png &
 ffmpeg -i $2 data/right/%04d.png &
 
 wait
-
+rm data/timestamps.txt
 for filename in data/left/*.png; do
 	base=$(basename $filename) 
 	echo ${base%.*} >> data/timestamps.txt
@@ -46,6 +46,9 @@ if [[ "$unamestr" != 'Darwin' ]]; then
 	cd ..
 fi
 
+# rotate cameras to align to xz-plane
+mv data/KeyFrameTrajectory.txt data/keyframes.bak
+frametxttopcd/build/rotcam data/keyframes.bak data/KeyFrameTrajectory.txt
 #Rectify keyframe images
 
 mkdir -p data/lrect
@@ -74,7 +77,8 @@ for filename in ../lrect/*.png; do
 		iter=0
 	fi
 	base=$(basename $filename) 
-	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &&\
+ 	#../../dispmap/disparitymap ../lrect/$base $filename ../../$3 # uncomment to use own disparity map
+	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &&\  #comment to use own disparity map
 	mv ${base%.*}_left_disparity.png $base &
 
 	iter=$((iter+1))
@@ -85,11 +89,12 @@ wait
 cd ../../
 
 #Create PCD files
-mkdir -p data/pcd/
+mkdir -p data/pcd/final
+mkdir -p data/pcd/cut
 cd data/pcd
 
 for filename in ../disp/*.png; do 
-	base=$(basename $filename) 
+	base=$(basename $filename)
 	../../3drecon/disp2cloud ../lrect/$base $filename ../../$3
 done
 
@@ -97,7 +102,7 @@ cd ../../
 
 #Merge all PCDs
 
-cp pcdfile/emptyCloud.pcd finalCloud.pcd
+cp pcdfile/emptyCloud.pcd data/pcd/final/finalCloud.pcd
 
 frametxttopcd/build/frametxt2pcd data/KeyFrameTrajectory.txt camerapos.pcd
 
@@ -108,14 +113,14 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 #	echo $number
 	echo $trans
 	pcdname=$number.pcd
-	build/cutting2 data/pcd/$pcdname camerapos.pcd $trans
+	build/cutting2 data/pcd/$pcdname camerapos.pcd $trans data/pcd/cut/$pcdname
 done < "data/KeyFrameTrajectory.txt"
 
-pcl_concatenate_points_pcd data/pcd/*
+pcl_concatenate_points_pcd data/pcd/cut/*
 
 mv output.pcd rgb_cloud.pcd
 
-for filename in data/pcd/*.pcd; do
+for filename in data/pcd/cut/*.pcd; do
 
     echo Using mls to smooth $filename
 
@@ -137,11 +142,14 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
     #	echo $number
     echo $trans
     pcdname=$number.pcd
-    build/merge data/pcd/$pcdname finalCloud.pcd 0.03 $trans
+	if [ -f data/pcd/cut/$pcdname ]
+	then
+		build/merge data/pcd/cut/$pcdname data/pcd/final/finalCloud.pcd 0.03 $trans
+	fi
 done < "data/KeyFrameTrajectory.txt"
 
 echo Cleaning pointcloud
-build/cleanup finalCloud.pcd 0.01 8 0.01
+build/cleanup data/pcd/final/finalCloud.pcd 0.01 8 0.01
 echo Done!
 
 #Mesh final PCD

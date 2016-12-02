@@ -158,6 +158,6 @@ main (int argc, char** argv)
         boost::this_thread::sleep (boost::posix_time::microseconds (100000));
     }
     */
-    pcl::io::savePCDFile (argv[1], *filteredCloud, true);
+    pcl::io::savePCDFile (argv[10], *filteredCloud, true);
     return (0);
 }
