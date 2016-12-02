@@ -26,7 +26,7 @@ cmake ../
 make
 cd ../../
 # build cameratrajectory to pcd converter
-cd frametxttopcd
+cd misc
 mkdir build
 cd build
 cmake ../
@@ -45,3 +45,11 @@ cd build
 cmake ..
 make
 cd ../../
+# build texture mapping
+cd mesh
+mkdir build
+cd build
+cmake ..
+make
+cd ../../
+

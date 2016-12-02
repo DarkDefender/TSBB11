@@ -48,7 +48,7 @@ fi
 
 # rotate cameras to align to xz-plane
 mv data/KeyFrameTrajectory.txt data/keyframes.bak
-frametxttopcd/build/rotcam data/keyframes.bak data/KeyFrameTrajectory.txt
+misc/build/rotcam data/keyframes.bak data/KeyFrameTrajectory.txt
 #Rectify keyframe images
 
 mkdir -p data/lrect
@@ -77,8 +77,8 @@ for filename in ../lrect/*.png; do
 		iter=0
 	fi
 	base=$(basename $filename) 
- 	#../../dispmap/disparitymap ../lrect/$base ../rrect/$base &  	# uncomment to use own disparity map
-	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base &	# comment to use own disparity map
+ 	#../../dispmap/disparitymap ../lrect/$base ../rrect/$base & # uncomment to use own disparity map
+	../../spsstereo/build/spsstereo ../lrect/$base ../rrect/$base # && # comment to use own disparity map
 	mv ${base%.*}_left_disparity.png $base &
 
 	iter=$((iter+1))
@@ -104,7 +104,7 @@ cd ../../
 
 cp pcdfile/emptyCloud.pcd data/pcd/final/finalCloud.pcd
 
-frametxttopcd/build/frametxt2pcd data/KeyFrameTrajectory.txt camerapos.pcd
+misc/build/keyframe2pcd data/KeyFrameTrajectory.txt camerapos.pcd
 
 while IFS='' read -r line || [[ -n "$line" ]]; do
     number=$(echo "$line" | awk '{print $1;}')
@@ -161,4 +161,5 @@ rm output.vtk
 echo Done
 
 #Open blender to calc volume
-
+pcl_obj2ply mesh.obj mesh.ply
+mesh/build/texturemapping mesh.ply data/KeyFrameTrajectory.txt stereo_cam.yml
