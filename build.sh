@@ -26,18 +26,19 @@ cmake ../
 make
 cd ../../
 # build cameratrajectory to pcd converter
-cd frametxttopcd
+cd misc
 mkdir build
 cd build
 cmake ../
 make
 cd ../../
 # build point cloud merger
+cd pcd_progs
 mkdir build
 cd build
 cmake ../
 make
-cd ..
+cd ../../
 # build disparity map
 cd dispmap
 mkdir build
@@ -45,3 +46,11 @@ cd build
 cmake ..
 make
 cd ../../
+# build texture mapping
+cd mesh
+mkdir build
+cd build
+cmake ..
+make
+cd ../../
+

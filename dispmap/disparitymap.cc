@@ -2,10 +2,11 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <string>
-
+ 
+//#include "opencv2/ximgproc/disparity_filter.hpp"
 
 using namespace cv;
-
+//using namespace cv::ximgproc;
 
 int main(int argc, char** argv){
 	if (argc != 3){
@@ -22,48 +23,35 @@ int main(int argc, char** argv){
 		std::cout << "Input image empty or of different sizes!" << std::endl;
 		return -1;
 	}
-
-	int window_size = 11;
+    /* stereosgbm settings */
+	int window_size = 7;
 	int min_disp = 0;
-	int num_disp = 128-min_disp;
+	int num_disp = 256-min_disp;
 	int uniquenessRatio = 10;
-	int speckleWindowSize = 100;
+	int speckleWindowSize = 21;
 	int speckleRange = 32;
 	int disp12MaxDiff = 1;
 	int preFilterCap = 63;
-	int P1 = 8*3*window_size*window_size;
-	int P2 = 32*3*window_size*window_size;
-
+	int P1 = 8*1*window_size*window_size;
+	int P2 = 32*1*window_size*window_size;
 
     // StereoSGBM::create (int minDisparity, int numDisparities, int blockSize, int P1=0, int P2=0, 
 	//		int disp12MaxDiff=0, int preFilterCap=0, int uniquenessRatio=0, int speckleWindowSize=0, int speckleRange=0, int mode=StereoSGBM::MODE_SGBM)
 	Ptr<StereoSGBM> sbm = StereoSGBM::create(min_disp, num_disp, window_size, P1, P2,
 			disp12MaxDiff, preFilterCap, uniquenessRatio, speckleWindowSize, speckleRange, StereoSGBM::MODE_HH);
-    /*sbm->setMode(StereoSGBM::MODE_HH);//   sSADWindowSize = 3;
-    sbm->numberOfDisparities = 144;
-    sbm->preFilterCap = 63;
-    sbm->minDisparity = -39;
-    sbm->uniquenessRatio = 10;
-    sbm->speckleWindowSize = 100;
-    sbm->speckleRange = 32;
-    sbm->disp12MaxDiff = 1;
-    sbm->fullDP = false;
-    sbm->setP1(216);
-    sbm->setP2(864);*/
+    
     sbm->compute(imgL, imgR, disp);
+	// normalize disparity map
 	disp = disp/16.0;
 
+	// write to file
 	std::string outputBaseFilename = argv[1];
 	size_t slashPosition = outputBaseFilename.rfind('/');
 	if (slashPosition != std::string::npos) outputBaseFilename.erase(0, slashPosition+1);
 	size_t dotPosition = outputBaseFilename.rfind('.');
 	if (dotPosition != std::string::npos) outputBaseFilename.erase(dotPosition);
 	std::string outputDisparityImageFilename = outputBaseFilename + "_left_disparity.png";
-	std::string outputSegmentImageFilename = outputBaseFilename + "_segment.png";
-	std::string outputBoundaryImageFilename = outputBaseFilename + "_boundary.png";
-	std::string outputDisparityPlaneFilename = outputBaseFilename + "_plane.txt";
-	std::string outputBoundaryLabelFilename = outputBaseFilename + "_label.txt";
- 
+	
 	imwrite(outputDisparityImageFilename, disp);
 	
 	return 0;

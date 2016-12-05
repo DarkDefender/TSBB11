@@ -5,12 +5,12 @@ if(APPLE)
 	link_directories(/usr/local/opt/opencv3/share/OpenCV/3rdparty/lib/ /usr/local/opt/opencv3/lib)
 endif()
 
-list( APPEND CMAKE_CXX_FLAGS "-Wall -ggdb -std=c++14 ${CMAKE_CXX_FLAGS}")
+list( APPEND CMAKE_CXX_FLAGS "-Wall -std=c++14 -O2 -march=native ${CMAKE_CXX_FLAGS}")
 
 #add_subdirectory(libs)
 add_executable(${PROJECT_NAME} cutting2.cpp)
-add_executable(merge normalCalcAndMerge.cpp)
-add_executable(cleanup cleanUp.cpp)
+add_executable(merge normal_calc_and_merge.cpp)
+add_executable(cleanup clean_up.cpp)
 
 include(FindPkgConfig)
 pkg_search_module(OPENCV REQUIRED opencv)

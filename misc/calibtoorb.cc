@@ -38,12 +38,12 @@ int main(int argc, char** argv){
 	//std::cout << "READING CAM PROPS" << std::endl;
 	int l_width, l_height, r_width, r_height;
 	float fps;
-	/*
+	
 	fs_calib["LEFT_width"] >> l_width;
 	fs_calib["LEFT_height"] >> l_height;
 	fs_calib["RIGHT_width"] >> r_width;
 	fs_calib["RIGHT_height"] >> r_height;
-	*/
+	
 	fs_calib["fps"] >> fps;
 	/* read orb-slam settings 
 	std::cout << "READING ORB_SLAM SETTINGS FROM " << argv[2] << std::endl;
