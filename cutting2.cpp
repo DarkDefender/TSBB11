@@ -11,12 +11,14 @@
 #include <pcl/filters/radius_outlier_removal.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/crop_hull.h>
+#include <pcl/filters/crop_box.h>
 
 #include <pcl/io/ply_io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/common/centroid.h>
+#include <pcl/common/common.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/common/transforms.h>
 #include <Eigen/Dense>
@@ -48,6 +50,32 @@ cropHull.setCropOutside(true);
 
 // apply filter
 cropHull.filter(*cropCloud);
+    
+}
+
+//-----------------------------
+// Crop Box
+//-----------------------------
+
+void cropPointsBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr inputCloud,
+                   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cropCloud,
+                   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPoses){
+    
+    pcl::PointXYZRGB minPtr, maxPtr;
+    pcl::getMinMax3D(*cloudPoses, minPtr, maxPtr);
+    
+    Eigen::Vector4f maxPoint(maxPtr.x,maxPtr.y,maxPtr.z,1);
+    Eigen::Vector4f minPoint(minPtr.x,minPtr.y,minPtr.z,1);
+
+    pcl::CropBox<pcl::PointXYZRGB> cropFilter;
+    cropFilter.setInputCloud (inputCloud);
+    cropFilter.setMin(minPoint);
+    cropFilter.setMax(maxPoint);
+    
+ //   cropFilter.setTranslation(boxTranslatation);
+ //   cropFilter.setRotation(boxRotation);
+    
+   	cropFilter.filter (*cropCloud);
     
 }
 
@@ -130,7 +158,8 @@ main (int argc, char** argv)
     
     //Crop
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cropAndTransCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    cropPoints(transCloud,cropAndTransCloud,cloudPoses);
+  //  cropPoints(transCloud,cropAndTransCloud,cloudPoses);
+    cropPointsBox(transCloud,cropAndTransCloud,cloudPoses);
     
     //VoxelGrid filtering
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr filteredCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
