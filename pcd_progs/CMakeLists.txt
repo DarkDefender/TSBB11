@@ -9,9 +9,8 @@ list( APPEND CMAKE_CXX_FLAGS "-Wall -std=c++14 -O2 -march=native ${CMAKE_CXX_FLA
 
 #add_subdirectory(libs)
 add_executable(${PROJECT_NAME} cutting2.cpp)
-add_executable(merge normalCalcAndMerge.cpp)
-add_executable(cleanup cleanUp.cpp)
-add_executable(texture texture.cpp)
+add_executable(merge normal_calc_and_merge.cpp)
+add_executable(cleanup clean_up.cpp)
 
 include(FindPkgConfig)
 pkg_search_module(OPENCV REQUIRED opencv)
@@ -25,6 +24,4 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(cleanup
 	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(merge
-	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
-target_link_libraries(texture
 	${OPENCV_LIBRARIES} ${PCL_LIBRARIES})
