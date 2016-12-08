@@ -550,8 +550,8 @@ int main (int argc, char** argv)
 	PCL_INFO ("...Done.\n");
 
 	// Display cameras to user
-	PCL_INFO ("\nDisplaying cameras. Press \'q\' to continue texture mapping\n");
-	showCameras(my_cams, cloud);
+	//PCL_INFO ("\nDisplaying cameras. Press \'q\' to continue texture mapping\n");
+	//showCameras(my_cams, cloud);
 
 
 	// Create materials for each texture (and one extra for occluded faces)

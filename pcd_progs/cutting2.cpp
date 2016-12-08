@@ -64,8 +64,8 @@ void cropPointsBox(pcl::PointCloud<pcl::PointXYZRGB>::Ptr inputCloud,
     pcl::PointXYZRGB minPtr, maxPtr;
     pcl::getMinMax3D(*cloudPoses, minPtr, maxPtr);
     
-    Eigen::Vector4f maxPoint(maxPtr.x,maxPtr.y,maxPtr.z,1);
-    Eigen::Vector4f minPoint(minPtr.x,minPtr.y,minPtr.z,1);
+    Eigen::Vector4f maxPoint(maxPtr.x,maxPtr.y+8,maxPtr.z,1);
+    Eigen::Vector4f minPoint(minPtr.x,minPtr.y-8,minPtr.z,1);
 
     pcl::CropBox<pcl::PointXYZRGB> cropFilter;
     cropFilter.setInputCloud (inputCloud);

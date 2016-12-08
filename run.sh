@@ -12,7 +12,10 @@ echo $2
 echo $3
 
 #TODO Make sure we handle absolute input paths correctly
-
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+NC='\033[0m' # No Color
+printf "I ${RED}love${NC} Stack ${GREEN}Overflow${NC}\n"
 #exit 0
 # remove data folder
 # rm -r data
@@ -22,9 +25,8 @@ echo $3
 mkdir -p data/left
 mkdir -p data/right
 
-ffmpeg -i $1 data/left/%04d.png &
-
-ffmpeg -i $2 data/right/%04d.png &
+ffmpeg -i $1 -vf "scale=768:ih*768/iw" data/left/%04d.png &
+ffmpeg -i $2 -vf "scale=768:ih*768/iw" data/right/%04d.png &
 
 wait
 rm data/timestamps.txt
@@ -104,7 +106,7 @@ cd ../../
 
 cp pcdfile/emptyCloud.pcd data/pcd/final/finalCloud.pcd
 
-misc/build/keyframe2pcd data/KeyFrameTrajectory.txt camerapos.pcd
+misc/build/keyframe2pcd data/KeyFrameTrajectory.txt data/pcd/final/camerapos.pcd
 
 while IFS='' read -r line || [[ -n "$line" ]]; do
     number=$(echo "$line" | awk '{print $1;}')
@@ -113,12 +115,12 @@ while IFS='' read -r line || [[ -n "$line" ]]; do
 #	echo $number
 	echo $trans
 	pcdname=$number.pcd
-	pcd_progs/build/cutting2 data/pcd/$pcdname camerapos.pcd $trans data/pcd/cut/$pcdname
+	pcd_progs/build/cutting2 data/pcd/$pcdname data/pcd/final/camerapos.pcd $trans data/pcd/cut/$pcdname
 done < "data/KeyFrameTrajectory.txt"
 
 pcl_concatenate_points_pcd data/pcd/cut/*
 
-mv output.pcd rgb_cloud.pcd
+mv output.pcd data/pcd/final/raw_rgb_cloud.pcd
 
 for filename in data/pcd/cut/*.pcd; do
 
@@ -156,12 +158,11 @@ echo Done!
 
 echo Generating mesh
 pcl_poisson_reconstruction finalCloud_clean.pcd output.vtk
-pcl_vtk2obj output.vtk mesh.obj
+pcl_vtk2ply output.vtk mesh.ply
 rm output.vtk
 echo Done
 
 #Map textures to the mesh
-pcl_obj2ply mesh.obj mesh.ply
 mesh/build/texturemapping mesh.ply data/KeyFrameTrajectory.txt stereo_cam.yml
 
 #Open blender to calc volume

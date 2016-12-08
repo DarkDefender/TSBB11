@@ -1,5 +1,5 @@
 #!/bin/bash 
-if (( $# != 3 )); then
+if (( $# != 6 )); then
     echo "Illegal number of parameters"
 	echo "Usage:"
 	echo "$0 <left_img_seq>.avi <right_img_seq>.avi <orb_settings>.yml square_size board_width board_height"
@@ -7,27 +7,28 @@ if (( $# != 3 )); then
 	exit 2
 fi
 echo Running stereo calibration with parameters:
-echo $1
+echo $1 
 echo $2
 echo $3
 echo $4
 echo $5
+echo $6
 
 mkdir -p data/calib/left
 mkdir -p data/calib/right
 
 echo splitting avis to imgs...
  
-ffmpeg -i $1 -r 0.5 data/calib/left/%d.png &
-ffmpeg -i $2 -r 0.5 data/calib/right/%d.png &
+ffmpeg -i $1 -vf "scale=768:ih*768/iw" -r 0.5 data/calib/left/%d.png &
+ffmpeg -i $2 -vf "scale=768:ih*768/iw" -r 0.5 data/calib/right/%d.png &
 
 wait
 
 echo calibrating intrinsic parameters...
 
-stereo-calibration/build/calibrate -i data/calib/left/%d.png -o data/calib/l_cam.yml -s $3 -w $4 -h $5 
+stereo-calibration/build/calibrate -i data/calib/left/%d.png -o data/calib/l_cam.yml -s $4 -w $5 -h $6 
 # usage: ./calibrate -i input -o output -s square_size -w board_width -h board_height
-stereo-calibration/build/calibrate -i data/calib/right/%d.png -o data/calib/r_cam.yml -s $3 -w $4 -h $5 
+stereo-calibration/build/calibrate -i data/calib/right/%d.png -o data/calib/r_cam.yml -s $4 -w $5 -h $6 
 # usage: ./calibrate -i input -o output -s square_size -w board_width -h board_height
 
 
@@ -43,12 +44,12 @@ misc/build/orbsetting data/calib/stereo_cam.yml $3 data/calib/orb_cam.yml
 
 cp $3 stereo_cam.yml
 echo "###############################" >> stereo_cam.yml
-echo "# CAMERA SETTINGS FOR ORBSLAM \#" >> stereo_cam.yml
+echo "# CAMERA SETTINGS FOR ORBSLAM #" >> stereo_cam.yml
 echo "###############################" >> stereo_cam.yml 
 sed -i -e 's/%/#/g' data/calib/orb_cam.yml # replace yaml header with comment 
 cat data/calib/orb_cam.yml >> stereo_cam.yml
 echo "###############################" >> stereo_cam.yml
-echo "# CAMERA CALIBRATION FOR RECT \#" >> stereo_cam.yml
+echo "# CAMERA CALIBRATION FOR RECT #" >> stereo_cam.yml
 echo "###############################" >> stereo_cam.yml  
 sed -i -e 's/%/#/g' data/calib/stereo_cam.yml # replace yaml header with comment 
 cat data/calib/stereo_cam.yml >> stereo_cam.yml
