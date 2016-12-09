@@ -17,9 +17,19 @@ GREEN='\033[1;32m'
 NC='\033[0m' # No Color
 printf "I ${RED}love${NC} Stack ${GREEN}Overflow${NC}\n"
 #exit 0
-# remove data folder
-# rm -r data
 
+if [ -d "data" ]; then
+	echo "The data directory already exists. Do you wish to remove it?"
+	echo "You must remove it if it contains data from an other data set"
+	echo "Please type the option number:"
+	select ync in "Yes" "No" "Cancel"; do
+		case $ync in
+			Yes ) rm -r data; break;;
+			No ) break;;
+			Cancel ) exit;;
+		esac
+	done
+fi
 #Preprocess input image data
 
 mkdir -p data/left
