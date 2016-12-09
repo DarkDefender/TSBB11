@@ -1,0 +1,191 @@
+%YAML:1.0
+#--------------------------------------------------------------------------------------------
+# ORB Parameters
+#--------------------------------------------------------------------------------------------
+
+# ORB Extractor: Number of features per image
+ORBextractor.nFeatures: 4000
+
+# ORB Extractor: Scale factor between levels in the scale pyramid
+ORBextractor.scaleFactor: 1.2
+
+# ORB Extractor: Number of levels in the scale pyramid
+ORBextractor.nLevels: 12
+
+# ORB Extractor: Fast threshold
+# Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
+# Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
+# You can lower these values if your images have low contrast			
+ORBextractor.iniThFAST: 20
+ORBextractor.minThFAST: 7
+
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+ 
+#--------------------------------------------------------------------------------------------
+# Camera Parameters for ORB-SLAM. Adjust them! Will be added by calib.script
+#--------------------------------------------------------------------------------------------
+
+# Camera calibration and distortion parameters (OpenCV) 
+# Camera.fx: 933.44407326729231 # =LEFT.P(0,0)
+# Camera.fy: 933.44407326729231 # =LEFT.P(1,1)
+# Camera.cx: 735.62555694580078 # =LEFT.P(0,2)
+# Camera.cy: 632.28582382202148 # =LEFT.P(1,2)
+#
+# Camera.k1: 0.0
+# Camera.k2: 0.0
+# Camera.p1: 0.0
+# Camera.p2: 0.0
+#
+# Camera.width: 1536
+# Camera.height: 1088
+#
+# # Camera frames per second 
+# Camera.fps: 20.0 #20.0
+#
+# # stereo baseline times fx
+# Camera.bf: 395.3439947700014 # =RIGHT.P(1,4) (=norm(T)*fx)
+#
+# # Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+Camera.RGB: 1
+#
+# # Close/Far threshold. Baseline times.
+ThDepth: 35
+
+#--------------------------------------------------------------------------------------------
+# Stereo Rectification. Only if you need to pre-rectify the images.
+# Camera.fx, .fy, etc must be the same as in LEFT.P
+#--------------------------------------------------------------------------------------------
+
+# will be added by calib.script!
+
+
+###############################
+# CAMERA SETTINGS FOR ORBSLAM #
+###############################
+#YAML:1.0
+Camera.width: 1536
+Camera.height: 1088
+Camera.fps: 25.
+Camera.fx: 8.7471493580190236e+02
+Camera.fy: 8.7471493580190236e+02
+Camera.cx: 7.6259052276611328e+02
+Camera.cy: 5.9371240997314453e+02
+Camera.k1: 0.
+Camera.k2: 0.
+Camera.p1: 0.
+Camera.p2: 0.
+Camera.bf: 3.6976526312223194e+02
+###############################
+# CAMERA CALIBRATION FOR RECT #
+###############################
+#YAML:1.0
+K1: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.0460772303579961e+02, 0., 7.6575057772206810e+02, 0.,
+       9.0747835801392830e+02, 5.6751573975965107e+02, 0., 0., 1. ]
+K2: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.0629405704372107e+02, 0., 7.5675394995091142e+02, 0.,
+       9.0674632909337868e+02, 5.5956422133501758e+02, 0., 0., 1. ]
+D1: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ -2.5994411370365178e-01, 1.2027717106649641e-01,
+       1.8084002387135000e-04, 1.3148813988835581e-03,
+       -3.1078302106402070e-02 ]
+D2: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [ -2.6148480715707867e-01, 1.2699157323947971e-01,
+       -4.5102926855322814e-04, -2.9220100834795467e-04,
+       -3.5231685447178862e-02 ]
+R: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.9157447035373125e-01, 1.5643920534475428e-02,
+       1.2858980322338348e-01, -1.8118822339690414e-02,
+       9.9967200988358684e-01, 1.8099197007951352e-02,
+       -1.2826448463912449e-01, -2.0276597486287427e-02,
+       9.9153269314462800e-01 ]
+T: [ -4.2155982836133110e-01, -2.2503120885692686e-03,
+    3.1305241617089918e-02 ]
+E: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 8.5584923147866403e-04, -3.1249345134809141e-02,
+       -2.7978577410042275e-03, -2.3029675753562389e-02,
+       -8.0580622439008175e-03, 4.2201588679609980e-01,
+       9.8695196529830151e-03, -4.2138635720066042e-01,
+       -7.3405271954895667e-03 ]
+F: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ -2.5388333539456278e-08, 9.2406360486403711e-07,
+       -4.2989975364560081e-04, 6.8282290304777299e-07,
+       2.3816332708723561e-07, -1.1977067035080762e-02,
+       -6.2821014951591238e-04, 1.0460475254359860e-02, 1. ]
+fps: 25.
+R1: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.9823987879498377e-01, 2.2423917595129191e-02,
+       5.4902753146476482e-02, -2.2924030291641518e-02,
+       9.9970110685477653e-01, 8.4962220146834674e-03,
+       -5.4695824507579920e-02, -9.7398600103772350e-03,
+       9.9845555830413113e-01 ]
+R2: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 9.9723991131056611e-01, 5.3233275009833382e-03,
+       -7.4055529662622105e-02, -5.9991110039337740e-03,
+       9.9994234600059184e-01, -8.9059161233074457e-03,
+       7.4003850956938094e-02, 9.3256023478476453e-03,
+       9.9721435167389816e-01 ]
+P1: !!opencv-matrix
+   rows: 3
+   cols: 4
+   dt: d
+   data: [ 8.7471493580190236e+02, 0., 7.6259052276611328e+02, 0., 0.,
+       8.7471493580190236e+02, 5.9371240997314453e+02, 0., 0., 0., 1.,
+       0. ]
+P2: !!opencv-matrix
+   rows: 3
+   cols: 4
+   dt: d
+   data: [ 8.7471493580190236e+02, 0., 7.6259052276611328e+02,
+       -3.6976526312223194e+02, 0., 8.7471493580190236e+02,
+       5.9371240997314453e+02, 0., 0., 0., 1., 0. ]
+Q: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [ 1., 0., 0., -7.6259052276611328e+02, 0., 1., 0.,
+       -5.9371240997314453e+02, 0., 0., 0., 8.7471493580190236e+02, 0.,
+       0., 2.3655952114483809e+00, 0. ]
+LEFT.width: 1536
+RIGHT.width: 1536
+LEFT.height: 1088
+RIGHT.height: 1088
