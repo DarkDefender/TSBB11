@@ -166,5 +166,5 @@ echo Done
 mesh/build/texturemapping mesh.ply data/KeyFrameTrajectory.txt stereo_cam.yml
 
 #Open blender to calc volume
-blender blender/emptyscene.blend --python blender/startup.py
+blender blender/emptyscene.blend --addons object_print3d_utils object_boolean_tools --python blender/startup.py
 
