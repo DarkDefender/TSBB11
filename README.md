@@ -1,20 +1,28 @@
 CDIO Project: 3D Mapping of Outdoor Scenes Using Stereo Imagery
 ========
 
-This project provides a pipeline to calculate the volume of simple real life
-objects that has been filmed by a stereo camera.
+This project provides a pipeline to generate a mesh of simple real life objects
+that has been filmed by a stereo camera. The goal is to then use the generated
+mesh to create a volume approximation of the object (using blender) 
 
 ## Dependencies
 
 CMake and GCC (the ORB-SLAM2 version used in this repo does not compile with clang)
 
 [OpenCV](http://opencv.org)
+
 [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+
 [BLAS](http://www.netlib.org/blas/)
+
 [LAPACK](http://www.netlib.org/lapack/)
+
 [Pangolin](https://github.com/stevenlovegrove/Pangolin)
+
 [PCL](http://pointclouds.org/)
+
 [Png++](http://www.nongnu.org/pngpp/)
+
 [Blender](http://www.blender.org)
 
 ## Build instructions
@@ -58,8 +66,8 @@ generated mesh.
 A frame from our "box1" data set.
 ![Frame1](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/0001.png)
 And the generated mesh:
-![Mesh](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/box.gif)
+![Mesh](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/box1.gif)
 
-## Documentation in pdfs
+## Documentation PDFs
 
 ...
