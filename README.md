@@ -81,4 +81,5 @@ labels, see this image:
 
 ## Documentation PDFs
 
+[Project Plan](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/CDIO_project_plan.pdf)
 [User Guide](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/CDIO_user_guide.pdf)
