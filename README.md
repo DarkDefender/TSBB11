@@ -7,23 +7,16 @@ mesh to create a volume approximation of the object (using blender)
 
 ## Dependencies
 
-CMake and GCC (the ORB-SLAM2 version used in this repo does not compile with clang)
-
-[OpenCV](http://opencv.org)
-
-[Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
-
-[BLAS](http://www.netlib.org/blas/)
-
-[LAPACK](http://www.netlib.org/lapack/)
-
-[Pangolin](https://github.com/stevenlovegrove/Pangolin)
-
-[PCL](http://pointclouds.org/)
-
-[Png++](http://www.nongnu.org/pngpp/)
-
-[Blender](http://www.blender.org)
+- CMake
+- GCC (the ORB-SLAM2 version used in this repo does not compile with clang)
+- [OpenCV](http://opencv.org)
+- [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+- [BLAS](http://www.netlib.org/blas/)
+- [LAPACK](http://www.netlib.org/lapack/)
+- [Pangolin](https://github.com/stevenlovegrove/Pangolin)
+- [PCL](http://pointclouds.org/)
+- [Png++](http://www.nongnu.org/pngpp/)
+- [Blender](http://www.blender.org)
 
 ## Build instructions
 
@@ -67,6 +60,24 @@ A frame from our "box1" data set.
 ![Frame1](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/0001.png)
 And the generated mesh:
 ![Mesh](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/box1.gif)
+
+#### Mesh accuracy
+On the "box1" data set, the accuracy seems to be quite good. **However**, more
+test data is needed to determine is the mesh generation is robust enough.
+
+The "real life" measurements were done using a folding ruler. The mesh
+measurements were done in blender. For an explanation of the different length
+labels, see this image: 
+[Box1 labels](https://github.com/DarkDefender/TSBB11/raw/master/doc_res/box_dim.png)
+
+|     | Real life | Mesh |  
+| --- | --- | --- |
+| Height [cm] | 50 | 49.7 |
+| Width long [cm] | 84 | 83.9 |
+| Width short [cm] | 65 | 64.5 |
+| Lenght long [cm] | 80 | 80.3 |
+| Lenght short [cm] | 75 | 75.4 |
+| Volume [m^3] | 0.3313 | 0.3339 |
 
 ## Documentation PDFs
 
